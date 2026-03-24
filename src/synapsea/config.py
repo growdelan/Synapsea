@@ -10,6 +10,7 @@ class AppConfig:
     data_dir: Path
     ollama_endpoint: str = "http://localhost:11434/api/generate"
     ollama_model: str = "gemma3:4b-it-qat"
+    ollama_timeout_seconds: int = 60
     enable_ai_review: bool = True
 
     @classmethod
@@ -26,5 +27,6 @@ class AppConfig:
             data_dir=resolved_data_dir,
             ollama_endpoint="http://localhost:11434/api/generate",
             ollama_model="gemma3:4b-it-qat",
+            ollama_timeout_seconds=60,
             enable_ai_review=enable_ai_review,
         )

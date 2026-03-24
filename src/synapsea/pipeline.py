@@ -68,6 +68,7 @@ class SynapseaApp:
                 HttpOllamaTransport(
                     endpoint=config.ollama_endpoint,
                     model=config.ollama_model,
+                    timeout_seconds=config.ollama_timeout_seconds,
                 )
             )
         return cls(

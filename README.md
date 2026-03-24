@@ -37,6 +37,7 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Domyślnie aplikacja analizuje `~/Downloads`.
 - Dane aplikacji są zapisywane w katalogu `./data`.
 - Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `gemma3:4b-it-qat`.
+- Domyślny timeout żądania do Ollama wynosi `60` sekund.
 - Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.
 - Komendy `apply` i `reject` aktualizują status propozycji oraz synchronizują `taxonomy.json`.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.

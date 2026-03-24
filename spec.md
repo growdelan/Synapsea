@@ -121,6 +121,13 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Konfiguracja projektu pozostaje lekka, ale backend build-systemu staje się jawną zależnością narzędziową repo.
 
+- Decyzja:
+  - Structured outputs dla warstwy Ollama są walidowane przez `pydantic`, a schema JSON jest przekazywana bezpośrednio do pola `format`.
+  Uzasadnienie:
+  - Propozycje review queue muszą mieć stabilny kontrakt danych, a sama odpowiedź modelu nie powinna zależeć od swobodnego formatowania tekstu.
+  Konsekwencje:
+  - Repo dodaje zależność `pydantic`, ale integracja AI jest bardziej deterministyczna i odporniejsza na błędy parsowania.
+
 ---
 
 ## Jakość i kryteria akceptacji

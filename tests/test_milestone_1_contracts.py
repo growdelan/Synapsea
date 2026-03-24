@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from synapsea.cluster_engine import ClusterEngine
 from synapsea.models import CandidateCluster, CategoryProposal, ClassificationDecision, ReviewItem, TaxonomyNode
-from synapsea.ollama_client import HttpOllamaTransport, OllamaClient
+from synapsea.ollama_client import HttpOllamaTransport, OllamaClient, _parse_json_response
 from synapsea.review_queue import ReviewQueueRepository
 from synapsea.taxonomy import TaxonomyRepository
 
@@ -17,9 +17,15 @@ class FakeTransport:
     def __init__(self, response: dict[str, object]) -> None:
         self.response = response
         self.payloads: list[dict[str, object]] = []
+        self.schemas: list[dict[str, object] | str] = []
 
-    def send(self, payload: dict[str, object]) -> dict[str, object]:
+    def send(
+        self,
+        payload: dict[str, object],
+        format_schema: dict[str, object] | str = "json",
+    ) -> dict[str, object]:
         self.payloads.append(payload)
+        self.schemas.append(format_schema)
         return self.response
 
 
@@ -114,6 +120,8 @@ class Milestone1ContractsTest(unittest.TestCase):
         self.assertEqual(proposal, CategoryProposal(True, "screenshots", "Powtarzalny wzorzec nazw i rozszerzen.", 0.92))
         self.assertEqual(review_item.status, "pending")
         self.assertEqual(review_item.target_path, "images/screenshots")
+        self.assertIsInstance(transport.schemas[0], dict)
+        self.assertIn("properties", transport.schemas[0])
 
         with TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -181,3 +189,19 @@ class Milestone1ContractsTest(unittest.TestCase):
             sent_payload = json.loads(http_request.data.decode("utf-8"))
             self.assertEqual(sent_payload["model"], "llama3.2")
             self.assertEqual(json.loads(sent_payload["prompt"]), payload)
+            self.assertEqual(sent_payload["format"], "json")
+            self.assertEqual(sent_payload["options"]["temperature"], 0)
+
+    def test_parse_json_response_handles_markdown_code_fence(self) -> None:
+        parsed = _parse_json_response(
+            """```json
+            {
+              "should_create_category": true,
+              "proposed_category": "screenshots",
+              "reason": "Powtarzalny wzorzec.",
+              "confidence": 0.91
+            }
+            ```"""
+        )
+
+        self.assertEqual(parsed["proposed_category"], "screenshots")
