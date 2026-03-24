@@ -16,6 +16,8 @@
 - Kandydaci klastrów zawierają scoring, typ klastra i przykładowe pliki gotowe do dalszej interpretacji przez AI.
 - Pipeline potrafi przekazać kandydatów klastrów do warstwy interpretacji AI i zapisać propozycje do `review_queue.json`.
 - Review queue utrzymuje statusy propozycji i deduplikuje wpisy po `cluster_id`.
+- Dostępne są komendy CLI `review`, `apply` i `reject`.
+- Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -35,15 +37,17 @@
 - Wyniki klastrowania są zapisywane w trwałym formacie i wynikają bezpośrednio z historii klasyfikacji.
 - Zrealizowano `Milestone 4: Interpretacja AI i kolejka review`.
 - Dodano próg confidence dla propozycji review i podstawowy tryb `--skip-ai` do lokalnej walidacji bez aktywnego modelu.
+- Zrealizowano `Milestone 5: CLI review/apply/reject i taksonomia MVP`.
+- Podstawowy przepływ MVP od klasyfikacji po akceptację lub odrzucenie propozycji jest dostępny przez CLI.
 
 ## Co jest w trakcie
 - Projekt ma ukończony bootstrap i warstwę kontraktów domenowych.
-- Kolejnym krokiem jest `Milestone 5: CLI review/apply/reject i taksonomia MVP`.
+- Kolejnym krokiem jest `Milestone 6: Pasywne uczenie i ewolucja taksonomii`.
 
 ## Co jest następne
-- Udostępnienie komend CLI do przeglądu, akceptacji i odrzucania propozycji.
-- Aktualizacja `taxonomy.json` na podstawie zaakceptowanych propozycji.
-- Walidacja scenariuszy review/apply/reject na danych zapisanych przez pipeline.
+- Rejestrowanie sygnałów pasywnego uczenia z działań użytkownika.
+- Przygotowanie rekomendacji split, merge, nowych podkategorii i martwych kategorii.
+- Podpięcie propozycji ewolucji pod istniejącą ścieżkę review.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -58,3 +62,4 @@
 - 2026-03-24: zrealizowano `Milestone 2`, dodając pełniejszą ekstrakcję cech i idempotentny zapis historii klasyfikacji.
 - 2026-03-24: zrealizowano `Milestone 3`, spinając historię klasyfikacji z generowaniem i zapisem kandydatów klastrów.
 - 2026-03-24: zrealizowano `Milestone 4`, podłączając interpretację AI i trwały zapis propozycji do review queue.
+- 2026-03-24: zrealizowano `Milestone 5`, udostępniając review/apply/reject przez CLI i aktualizację taksonomii.

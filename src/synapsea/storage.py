@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import closing
 import json
 import sqlite3
 from pathlib import Path
@@ -17,7 +18,7 @@ class DecisionLogRepository:
         return sqlite3.connect(self.db_path)
 
     def _initialize(self) -> None:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection, connection:
             connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS classification_log (
@@ -49,7 +50,7 @@ class DecisionLogRepository:
             )
 
     def record(self, decision: ClassificationDecision) -> None:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection, connection:
             connection.execute(
                 """
                 INSERT INTO classification_log (
@@ -88,7 +89,7 @@ class DecisionLogRepository:
             )
 
     def list_all(self) -> list[ClassificationDecision]:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             rows = connection.execute(
                 """
                 SELECT

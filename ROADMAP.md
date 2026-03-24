@@ -124,7 +124,7 @@ Uwagi:
 
 ---
 
-## Milestone 5: CLI review/apply/reject i taksonomia MVP (planned)
+## Milestone 5: CLI review/apply/reject i taksonomia MVP (done)
 
 Cel:
 - udostępnić użytkownikowi pełny przepływ obsługi propozycji przez CLI

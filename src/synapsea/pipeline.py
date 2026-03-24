@@ -8,11 +8,12 @@ from synapsea.classifier import FileClassifier
 from synapsea.cluster_engine import ClusterEngine
 from synapsea.config import AppConfig
 from synapsea.feature_extractor import FeatureExtractor
-from synapsea.models import CandidateCluster, ClassificationDecision, FileFeatures, ReviewItem
+from synapsea.models import CandidateCluster, ClassificationDecision, FileFeatures, ReviewItem, TaxonomyNode
 from synapsea.ollama_client import HttpOllamaTransport, OllamaClient
 from synapsea.review_queue import ReviewQueueRepository
 from synapsea.scanner import FileScanner
 from synapsea.storage import DecisionLogRepository
+from synapsea.taxonomy import TaxonomyRepository
 
 
 FileIterator = Callable[[], Iterable[Path]]
@@ -29,6 +30,7 @@ class SynapseaApp:
         cluster_engine: ClusterEngine | None = None,
         candidate_clusters: CandidateClusterRepository | None = None,
         review_queue: ReviewQueueRepository | None = None,
+        taxonomy: TaxonomyRepository | None = None,
         proposal_interpreter: OllamaClient | None = None,
         iter_files: FileIterator | None = None,
     ) -> None:
@@ -40,6 +42,7 @@ class SynapseaApp:
         self.cluster_engine = cluster_engine or ClusterEngine()
         self.candidate_clusters = candidate_clusters
         self.review_queue = review_queue
+        self.taxonomy = taxonomy
         self.proposal_interpreter = proposal_interpreter
         self.iter_files = iter_files or self._iter_source_files
 
@@ -48,6 +51,7 @@ class SynapseaApp:
         decision_log = DecisionLogRepository(config.data_dir / "classification_log.db")
         candidate_clusters = CandidateClusterRepository(config.data_dir / "candidate_clusters.json")
         review_queue = ReviewQueueRepository(config.data_dir / "review_queue.json")
+        taxonomy = TaxonomyRepository(config.data_dir / "taxonomy.json")
         proposal_interpreter = None
         if config.enable_ai_review:
             proposal_interpreter = OllamaClient(
@@ -61,6 +65,7 @@ class SynapseaApp:
             decision_log=decision_log,
             candidate_clusters=candidate_clusters,
             review_queue=review_queue,
+            taxonomy=taxonomy,
             proposal_interpreter=proposal_interpreter,
         )
 
@@ -104,3 +109,31 @@ class SynapseaApp:
 
     def extract_features(self, path: Path) -> FileFeatures:
         return self.feature_extractor.extract(path)
+
+    def list_review_items(self) -> list[ReviewItem]:
+        if self.review_queue is None:
+            return []
+        return self.review_queue.list_items()
+
+    def apply_review_item(self, item_id: str) -> ReviewItem:
+        if self.review_queue is None or self.taxonomy is None:
+            raise RuntimeError("Brak skonfigurowanej review queue lub taksonomii.")
+        item = self.review_queue.update_status(item_id, "applied")
+        taxonomy = self.taxonomy.load()
+        parent = taxonomy.get(item.parent_category)
+        if parent is None:
+            taxonomy[item.parent_category] = TaxonomyNode(children=[item.proposed_category], status="stable")
+        else:
+            children = list(parent.children)
+            if item.proposed_category not in children:
+                children.append(item.proposed_category)
+            taxonomy[item.parent_category] = TaxonomyNode(children=children, status=parent.status)
+        if item.proposed_category not in taxonomy:
+            taxonomy[item.proposed_category] = TaxonomyNode(children=[], status="proposed")
+        self.taxonomy.save(taxonomy)
+        return item
+
+    def reject_review_item(self, item_id: str) -> ReviewItem:
+        if self.review_queue is None:
+            raise RuntimeError("Brak skonfigurowanej review queue.")
+        return self.review_queue.update_status(item_id, "rejected")
