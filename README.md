@@ -14,6 +14,14 @@ Przydatne opcje podczas lokalnej pracy:
 uv run python -m synapsea run --source ~/Downloads --data-dir ./data
 ```
 
+Walidacja lokalna bez aktywnego Ollama:
+
+```bash
+uv run python -m synapsea run --skip-ai --source ~/Downloads --data-dir ./data
+```
+
 ## Konfiguracja
 - Domyślnie aplikacja analizuje `~/Downloads`.
 - Dane aplikacji są zapisywane w katalogu `./data`.
+- Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `llama3.2`.
+- Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.

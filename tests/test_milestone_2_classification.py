@@ -31,7 +31,9 @@ class Milestone2ClassificationTest(unittest.TestCase):
             (source_dir / "Screenshot-2026-03-24.png").write_text("stub", encoding="utf-8")
             (source_dir / "invoice_v2.pdf").write_text("stub", encoding="utf-8")
 
-            app = SynapseaApp.from_config(AppConfig(source_dir=source_dir, data_dir=data_dir))
+            app = SynapseaApp.from_config(
+                AppConfig(source_dir=source_dir, data_dir=data_dir, enable_ai_review=False)
+            )
 
             first_processed = app.run_once()
             second_processed = app.run_once()

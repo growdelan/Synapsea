@@ -10,9 +10,15 @@ class AppConfig:
     data_dir: Path
     ollama_endpoint: str = "http://localhost:11434/api/generate"
     ollama_model: str = "llama3.2"
+    enable_ai_review: bool = True
 
     @classmethod
-    def from_args(cls, source: Path | None, data_dir: Path | None) -> "AppConfig":
+    def from_args(
+        cls,
+        source: Path | None,
+        data_dir: Path | None,
+        enable_ai_review: bool = True,
+    ) -> "AppConfig":
         source_dir = (source or Path("~/Downloads")).expanduser()
         resolved_data_dir = (data_dir or Path("data")).expanduser()
         return cls(
@@ -20,4 +26,5 @@ class AppConfig:
             data_dir=resolved_data_dir,
             ollama_endpoint="http://localhost:11434/api/generate",
             ollama_model="llama3.2",
+            enable_ai_review=enable_ai_review,
         )

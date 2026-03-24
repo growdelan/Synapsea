@@ -21,7 +21,13 @@ class Milestone3ClustersTest(unittest.TestCase):
             (source_dir / "invoice_v1.pdf").write_text("stub", encoding="utf-8")
             (source_dir / "invoice_v2.pdf").write_text("stub", encoding="utf-8")
 
-            app = SynapseaApp.from_config(AppConfig(source_dir, data_dir, "http://localhost:11434/api/generate", "llama3.2"))
+            app = SynapseaApp.from_config(
+                AppConfig(
+                    source_dir=source_dir,
+                    data_dir=data_dir,
+                    enable_ai_review=False,
+                )
+            )
 
             processed = app.run_once()
             clusters_payload = json.loads((data_dir / "candidate_clusters.json").read_text(encoding="utf-8"))

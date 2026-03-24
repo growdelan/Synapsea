@@ -14,6 +14,8 @@
 - Historia klasyfikacji jest utrwalana idempotentnie w SQLite wraz z zapisanymi cechami pliku.
 - Pipeline materializuje kandydatów klastrów do `candidate_clusters.json` na podstawie zapisanej historii klasyfikacji.
 - Kandydaci klastrów zawierają scoring, typ klastra i przykładowe pliki gotowe do dalszej interpretacji przez AI.
+- Pipeline potrafi przekazać kandydatów klastrów do warstwy interpretacji AI i zapisać propozycje do `review_queue.json`.
+- Review queue utrzymuje statusy propozycji i deduplikuje wpisy po `cluster_id`.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -31,15 +33,17 @@
 - Pipeline zapisuje komplet podstawowych cech potrzebnych do dalszego klastrowania bez użycia AI.
 - Zrealizowano `Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów`.
 - Wyniki klastrowania są zapisywane w trwałym formacie i wynikają bezpośrednio z historii klasyfikacji.
+- Zrealizowano `Milestone 4: Interpretacja AI i kolejka review`.
+- Dodano próg confidence dla propozycji review i podstawowy tryb `--skip-ai` do lokalnej walidacji bez aktywnego modelu.
 
 ## Co jest w trakcie
 - Projekt ma ukończony bootstrap i warstwę kontraktów domenowych.
-- Kolejnym krokiem jest `Milestone 4: Interpretacja AI i kolejka review`.
+- Kolejnym krokiem jest `Milestone 5: CLI review/apply/reject i taksonomia MVP`.
 
 ## Co jest następne
-- Podłączenie lokalnej warstwy AI do kandydatów klastrów.
-- Zapis propozycji do review queue z uzasadnieniem i confidence.
-- Wprowadzenie podstawowych reguł redukujących over-clustering przed zatwierdzeniem przez użytkownika.
+- Udostępnienie komend CLI do przeglądu, akceptacji i odrzucania propozycji.
+- Aktualizacja `taxonomy.json` na podstawie zaakceptowanych propozycji.
+- Walidacja scenariuszy review/apply/reject na danych zapisanych przez pipeline.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -53,3 +57,4 @@
 - 2026-03-24: zrealizowano `Milestone 1`, dodając kontrakty domenowe, heurystyki klastrów oraz walidację odpowiedzi z Ollama.
 - 2026-03-24: zrealizowano `Milestone 2`, dodając pełniejszą ekstrakcję cech i idempotentny zapis historii klasyfikacji.
 - 2026-03-24: zrealizowano `Milestone 3`, spinając historię klasyfikacji z generowaniem i zapisem kandydatów klastrów.
+- 2026-03-24: zrealizowano `Milestone 4`, podłączając interpretację AI i trwały zapis propozycji do review queue.

@@ -101,7 +101,7 @@ Uwagi:
 
 ---
 
-## Milestone 4: Interpretacja AI i kolejka review (planned)
+## Milestone 4: Interpretacja AI i kolejka review (done)
 
 Cel:
 - przekształcać kandydatów klastrów w audytowalne propozycje zmian struktury
