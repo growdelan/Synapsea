@@ -18,6 +18,8 @@
 - Review queue utrzymuje statusy propozycji i deduplikuje wpisy po `cluster_id`.
 - Dostępne są komendy CLI `review`, `apply` i `reject`.
 - Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
+- Pipeline zapisuje sygnały pasywnego uczenia w `learning_signals.json` i snapshoty obserwowanego drzewa plików.
+- Silnik ewolucji potrafi generować dodatkowe propozycje review dla podkategorii, merge oraz martwych kategorii.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -39,15 +41,17 @@
 - Dodano próg confidence dla propozycji review i podstawowy tryb `--skip-ai` do lokalnej walidacji bez aktywnego modelu.
 - Zrealizowano `Milestone 5: CLI review/apply/reject i taksonomia MVP`.
 - Podstawowy przepływ MVP od klasyfikacji po akceptację lub odrzucenie propozycji jest dostępny przez CLI.
+- Zrealizowano `Milestone 6: Pasywne uczenie i ewolucja taksonomii`.
+- Repo ma już pełną pętlę: klasyfikacja, klastrowanie, review, taksonomia oraz sygnały uczenia do dalszej ewolucji.
 
 ## Co jest w trakcie
-- Projekt ma ukończony bootstrap i warstwę kontraktów domenowych.
-- Kolejnym krokiem jest `Milestone 6: Pasywne uczenie i ewolucja taksonomii`.
+- Wszystkie milestone’y z bieżącej roadmapy oznaczone wcześniej jako `planned` zostały zrealizowane.
+- Projekt jest gotowy na kolejny etap planowania lub doprecyzowanie następnego przyrostu.
 
 ## Co jest następne
-- Rejestrowanie sygnałów pasywnego uczenia z działań użytkownika.
-- Przygotowanie rekomendacji split, merge, nowych podkategorii i martwych kategorii.
-- Podpięcie propozycji ewolucji pod istniejącą ścieżkę review.
+- Wyznaczenie kolejnego zakresu po obecnej roadmapie.
+- Doprecyzowanie jakości heurystyk i skuteczności klasyfikacji na rzeczywistym zbiorze plików.
+- Walidacja działania z realnym lokalnym modelem Ollama na docelowych danych użytkownika.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -63,3 +67,4 @@
 - 2026-03-24: zrealizowano `Milestone 3`, spinając historię klasyfikacji z generowaniem i zapisem kandydatów klastrów.
 - 2026-03-24: zrealizowano `Milestone 4`, podłączając interpretację AI i trwały zapis propozycji do review queue.
 - 2026-03-24: zrealizowano `Milestone 5`, udostępniając review/apply/reject przez CLI i aktualizację taksonomii.
+- 2026-03-24: zrealizowano `Milestone 6`, dodając pasywne uczenie, snapshoty i propozycje ewolucji taksonomii.

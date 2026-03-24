@@ -147,7 +147,7 @@ Uwagi:
 
 ---
 
-## Milestone 6: Pasywne uczenie i ewolucja taksonomii (planned)
+## Milestone 6: Pasywne uczenie i ewolucja taksonomii (done)
 
 Cel:
 - rozszerzyć system o uczenie z zachowań użytkownika i rekomendacje ewolucji struktury

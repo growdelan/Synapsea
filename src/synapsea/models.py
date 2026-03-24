@@ -130,3 +130,15 @@ class TaxonomyNode:
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
+
+
+@dataclass(slots=True)
+class LearningSignal:
+    signal_id: str
+    signal_type: str
+    category: str
+    file_path: str
+    details: dict[str, object] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
