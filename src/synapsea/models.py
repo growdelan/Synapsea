@@ -9,6 +9,9 @@ class FileFeatures:
     path: str
     extension: str
     tokens: list[str]
+    keywords: list[str] = field(default_factory=list)
+    pattern_signals: dict[str, float] = field(default_factory=dict)
+    heuristic_classes: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -19,6 +22,9 @@ class ClassificationDecision:
     confidence: float
     extension: str = ""
     tokens: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    pattern_signals: dict[str, float] = field(default_factory=dict)
+    heuristic_classes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)

@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Callable, Iterable
 
 from synapsea.classifier import FileClassifier
 from synapsea.config import AppConfig
+from synapsea.feature_extractor import FeatureExtractor
 from synapsea.models import ClassificationDecision, FileFeatures
+from synapsea.scanner import FileScanner
 from synapsea.storage import DecisionLogRepository
-
-
-TOKEN_SPLIT_PATTERN = re.compile(r"[^a-zA-Z0-9]+")
 
 
 FileIterator = Callable[[], Iterable[Path]]
@@ -22,11 +20,15 @@ class SynapseaApp:
         source_dir: Path,
         decision_log: DecisionLogRepository,
         classifier: FileClassifier | None = None,
+        feature_extractor: FeatureExtractor | None = None,
+        scanner: FileScanner | None = None,
         iter_files: FileIterator | None = None,
     ) -> None:
         self.source_dir = source_dir
         self.decision_log = decision_log
         self.classifier = classifier or FileClassifier()
+        self.feature_extractor = feature_extractor or FeatureExtractor()
+        self.scanner = scanner or FileScanner()
         self.iter_files = iter_files or self._iter_source_files
 
     @classmethod
@@ -45,12 +47,7 @@ class SynapseaApp:
         return processed
 
     def _iter_source_files(self) -> Iterable[Path]:
-        for path in sorted(self.source_dir.iterdir()):
-            if path.is_file():
-                yield path
+        yield from self.scanner.scan(self.source_dir)
 
     def extract_features(self, path: Path) -> FileFeatures:
-        extension = path.suffix.lower().lstrip(".")
-        stem = path.stem.lower()
-        tokens = [token for token in TOKEN_SPLIT_PATTERN.split(stem) if token]
-        return FileFeatures(path=str(path), extension=extension, tokens=tokens)
+        return self.feature_extractor.extract(path)

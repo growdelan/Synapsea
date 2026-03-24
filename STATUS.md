@@ -10,6 +10,8 @@
 - Istnieją kontrakty domenowe dla `candidate_cluster`, review queue, propozycji AI i taksonomii.
 - Działa heurystyczne wykrywanie klastrów dla tokenów, rozszerzeń i wzorców nazw.
 - Istnieje warstwa walidacji odpowiedzi z Ollama oraz zapis review i taksonomii w formacie zgodnym ze spec.
+- Działa jawny skaner plików i ekstraktor cech zgodny z MVP: rozszerzenia, tokeny, słowa kluczowe, sygnały wzorców i klasy heurystyczne.
+- Historia klasyfikacji jest utrwalana idempotentnie w SQLite wraz z zapisanymi cechami pliku.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -23,15 +25,17 @@
 - Repo ma bootstrap projektu w układzie `src/`, plik `pyproject.toml` i podstawową komendę uruchomieniową opisaną w `README.md`.
 - Zrealizowano `Milestone 1: Kontrakty danych i walidacja ryzyk MVP`.
 - Zweryfikowano kontrakt lokalnej komunikacji HTTP z Ollama oraz mapowanie odpowiedzi AI do review queue.
+- Zrealizowano `Milestone 2: Klasyfikacja plików i historia decyzji`.
+- Pipeline zapisuje komplet podstawowych cech potrzebnych do dalszego klastrowania bez użycia AI.
 
 ## Co jest w trakcie
 - Projekt ma ukończony bootstrap i warstwę kontraktów domenowych.
-- Kolejnym krokiem jest `Milestone 2: Klasyfikacja plików i historia decyzji`.
+- Kolejnym krokiem jest `Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów`.
 
 ## Co jest następne
-- Rozszerzenie klasyfikacji o pełniejszą ekstrakcję cech zgodną z PRD.
-- Utrwalenie historii decyzji i zapewnienie idempotencji ponownych uruchomień.
-- Przygotowanie danych wejściowych pod dalsze klastrowanie bez generowania kategorii przez AI.
+- Powiązanie zapisanej historii klasyfikacji z budową klastrów kandydackich.
+- Rozszerzenie heurystyk o scoring i reprezentatywne przykłady plików dla klastrów.
+- Przygotowanie wyników klastrowania jako bezpośredniego wejścia dla warstwy AI.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -43,3 +47,4 @@
 - 2026-03-24: doprecyzowano założenia MVP dotyczące systemu operacyjnego, katalogu wejściowego, trybu działania procesu i kryteriów jakości.
 - 2026-03-24: zrealizowano `Milestone 0.5`, dodając bootstrap aplikacji, podstawowy pipeline klasyfikacji, zapis decyzji oraz smoke test.
 - 2026-03-24: zrealizowano `Milestone 1`, dodając kontrakty domenowe, heurystyki klastrów oraz walidację odpowiedzi z Ollama.
+- 2026-03-24: zrealizowano `Milestone 2`, dodając pełniejszą ekstrakcję cech i idempotentny zapis historii klasyfikacji.

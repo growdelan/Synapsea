@@ -33,4 +33,7 @@ class FileClassifier:
             confidence=0.9 if category != "uncategorized" else 0.4,
             extension=features.extension,
             tokens=features.tokens,
+            keywords=features.keywords,
+            pattern_signals=features.pattern_signals,
+            heuristic_classes=features.heuristic_classes,
         )

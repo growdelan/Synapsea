@@ -55,7 +55,7 @@ Uwagi:
 
 ---
 
-## Milestone 2: Klasyfikacja plików i historia decyzji (planned)
+## Milestone 2: Klasyfikacja plików i historia decyzji (done)
 
 Cel:
 - dostarczyć stabilny lokalny przepływ skanowania folderu, ekstrakcji cech i klasyfikacji plików
