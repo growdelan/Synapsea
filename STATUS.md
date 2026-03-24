@@ -16,10 +16,12 @@
 - Kandydaci klastrów zawierają scoring, typ klastra i przykładowe pliki gotowe do dalszej interpretacji przez AI.
 - Pipeline potrafi przekazać kandydatów klastrów do warstwy interpretacji AI i zapisać propozycje do `review_queue.json`.
 - Review queue utrzymuje statusy propozycji i deduplikuje wpisy po `cluster_id`.
+- Warstwa Ollama korzysta ze structured outputs z walidacją przez `pydantic` zamiast opierać się na swobodnym parsowaniu tekstu.
 - Dostępne są komendy CLI `review`, `apply` i `reject`.
 - Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
 - Pipeline zapisuje sygnały pasywnego uczenia w `learning_signals.json` i snapshoty obserwowanego drzewa plików.
 - Silnik ewolucji potrafi generować dodatkowe propozycje review dla podkategorii, merge oraz martwych kategorii.
+- Potwierdzono lokalne uruchomienie pełnego przebiegu z modelem `gemma3:4b-it-qat`.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -43,6 +45,7 @@
 - Podstawowy przepływ MVP od klasyfikacji po akceptację lub odrzucenie propozycji jest dostępny przez CLI.
 - Zrealizowano `Milestone 6: Pasywne uczenie i ewolucja taksonomii`.
 - Repo ma już pełną pętlę: klasyfikacja, klastrowanie, review, taksonomia oraz sygnały uczenia do dalszej ewolucji.
+- Integracja z Ollama została utwardzona przez structured outputs, walidację schematu oraz wydłużony timeout dla wolniejszego modelu lokalnego.
 
 ## Co jest w trakcie
 - Wszystkie milestone’y z bieżącej roadmapy oznaczone wcześniej jako `planned` zostały zrealizowane.
@@ -51,11 +54,11 @@
 ## Co jest następne
 - Wyznaczenie kolejnego zakresu po obecnej roadmapie.
 - Doprecyzowanie jakości heurystyk i skuteczności klasyfikacji na rzeczywistym zbiorze plików.
-- Walidacja działania z realnym lokalnym modelem Ollama na docelowych danych użytkownika.
+- Redukcja liczby zduplikowanych propozycji kategorii generowanych z wielu podobnych klastrów.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
-- Jakość odpowiedzi z lokalnego modelu Ollama będzie wymagała wczesnej walidacji na reprezentatywnych danych.
+- Jakość odpowiedzi z lokalnego modelu Ollama nadal wymaga walidacji na reprezentatywnych danych i lepszego ograniczania duplikatów propozycji.
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
@@ -68,3 +71,4 @@
 - 2026-03-24: zrealizowano `Milestone 4`, podłączając interpretację AI i trwały zapis propozycji do review queue.
 - 2026-03-24: zrealizowano `Milestone 5`, udostępniając review/apply/reject przez CLI i aktualizację taksonomii.
 - 2026-03-24: zrealizowano `Milestone 6`, dodając pasywne uczenie, snapshoty i propozycje ewolucji taksonomii.
+- 2026-03-24: utwardzono integrację z Ollama przez structured outputs z `pydantic`, model `gemma3:4b-it-qat` i domyślny timeout `60s`.
