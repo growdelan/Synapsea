@@ -9,7 +9,7 @@ class AppConfig:
     source_dir: Path
     data_dir: Path
     ollama_endpoint: str = "http://localhost:11434/api/generate"
-    ollama_model: str = "llama3.2"
+    ollama_model: str = "gemma3:4b-it-qat"
     enable_ai_review: bool = True
 
     @classmethod
@@ -25,6 +25,6 @@ class AppConfig:
             source_dir=source_dir,
             data_dir=resolved_data_dir,
             ollama_endpoint="http://localhost:11434/api/generate",
-            ollama_model="llama3.2",
+            ollama_model="gemma3:4b-it-qat",
             enable_ai_review=enable_ai_review,
         )
