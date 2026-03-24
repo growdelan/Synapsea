@@ -9,7 +9,7 @@ Dozwolone statusy:
 
 ---
 
-## Milestone 0.5: Minimal end-to-end slice (planned)
+## Milestone 0.5: Minimal end-to-end slice (done)
 
 Cel:
 - uruchomić minimalny przepływ od wejścia CLI do zapisu wyniku na lokalnych danych testowych
