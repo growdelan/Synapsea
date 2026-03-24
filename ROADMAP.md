@@ -9,7 +9,7 @@ Dozwolone statusy:
 
 ---
 
-## Milestone 0.5: Minimal end-to-end slice (planned)
+## Milestone 0.5: Minimal end-to-end slice (done)
 
 Cel:
 - uruchomić minimalny przepływ od wejścia CLI do zapisu wyniku na lokalnych danych testowych
@@ -32,7 +32,7 @@ Zakres:
 
 ---
 
-## Milestone 1: Kontrakty danych i walidacja ryzyk MVP (planned)
+## Milestone 1: Kontrakty danych i walidacja ryzyk MVP (done)
 
 Cel:
 - zredukować ryzyko błędnego kształtu danych wejściowych dla warstwy AI i review
@@ -55,7 +55,7 @@ Uwagi:
 
 ---
 
-## Milestone 2: Klasyfikacja plików i historia decyzji (planned)
+## Milestone 2: Klasyfikacja plików i historia decyzji (done)
 
 Cel:
 - dostarczyć stabilny lokalny przepływ skanowania folderu, ekstrakcji cech i klasyfikacji plików
@@ -78,7 +78,7 @@ Uwagi:
 
 ---
 
-## Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów (planned)
+## Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów (done)
 
 Cel:
 - zbudować warstwę heurystyczną przygotowującą dane dla interpretacji AI
@@ -101,7 +101,7 @@ Uwagi:
 
 ---
 
-## Milestone 4: Interpretacja AI i kolejka review (planned)
+## Milestone 4: Interpretacja AI i kolejka review (done)
 
 Cel:
 - przekształcać kandydatów klastrów w audytowalne propozycje zmian struktury
@@ -124,7 +124,7 @@ Uwagi:
 
 ---
 
-## Milestone 5: CLI review/apply/reject i taksonomia MVP (planned)
+## Milestone 5: CLI review/apply/reject i taksonomia MVP (done)
 
 Cel:
 - udostępnić użytkownikowi pełny przepływ obsługi propozycji przez CLI
@@ -147,7 +147,7 @@ Uwagi:
 
 ---
 
-## Milestone 6: Pasywne uczenie i ewolucja taksonomii (planned)
+## Milestone 6: Pasywne uczenie i ewolucja taksonomii (done)
 
 Cel:
 - rozszerzyć system o uczenie z zachowań użytkownika i rekomendacje ewolucji struktury
