@@ -3,7 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Iterable
 
+from synapsea.candidate_clusters import CandidateClusterRepository
 from synapsea.classifier import FileClassifier
+from synapsea.cluster_engine import ClusterEngine
 from synapsea.config import AppConfig
 from synapsea.feature_extractor import FeatureExtractor
 from synapsea.models import ClassificationDecision, FileFeatures
@@ -22,6 +24,8 @@ class SynapseaApp:
         classifier: FileClassifier | None = None,
         feature_extractor: FeatureExtractor | None = None,
         scanner: FileScanner | None = None,
+        cluster_engine: ClusterEngine | None = None,
+        candidate_clusters: CandidateClusterRepository | None = None,
         iter_files: FileIterator | None = None,
     ) -> None:
         self.source_dir = source_dir
@@ -29,12 +33,19 @@ class SynapseaApp:
         self.classifier = classifier or FileClassifier()
         self.feature_extractor = feature_extractor or FeatureExtractor()
         self.scanner = scanner or FileScanner()
+        self.cluster_engine = cluster_engine or ClusterEngine()
+        self.candidate_clusters = candidate_clusters
         self.iter_files = iter_files or self._iter_source_files
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "SynapseaApp":
         decision_log = DecisionLogRepository(config.data_dir / "classification_log.db")
-        return cls(source_dir=config.source_dir, decision_log=decision_log)
+        candidate_clusters = CandidateClusterRepository(config.data_dir / "candidate_clusters.json")
+        return cls(
+            source_dir=config.source_dir,
+            decision_log=decision_log,
+            candidate_clusters=candidate_clusters,
+        )
 
     def run_once(self) -> int:
         processed = 0
@@ -44,7 +55,15 @@ class SynapseaApp:
             decision = self.classifier.classify(self.extract_features(path))
             self.decision_log.record(decision)
             processed += 1
+        self.refresh_candidate_clusters()
         return processed
+
+    def refresh_candidate_clusters(self) -> list[ClassificationDecision]:
+        decisions = self.decision_log.list_all()
+        if self.candidate_clusters is not None:
+            clusters = self.cluster_engine.build_clusters(decisions)
+            self.candidate_clusters.save(clusters)
+        return decisions
 
     def _iter_source_files(self) -> Iterable[Path]:
         yield from self.scanner.scan(self.source_dir)

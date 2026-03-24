@@ -14,6 +14,9 @@ class FakeDecisionLogRepository:
     def record(self, decision: ClassificationDecision) -> None:
         self.decisions.append(decision)
 
+    def list_all(self) -> list[ClassificationDecision]:
+        return list(self.decisions)
+
 
 class SmokeTest(unittest.TestCase):
     def test_run_once_records_simple_decisions_without_disk_io(self) -> None:

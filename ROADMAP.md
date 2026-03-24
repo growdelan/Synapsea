@@ -78,7 +78,7 @@ Uwagi:
 
 ---
 
-## Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów (planned)
+## Milestone 3: Detekcja wzorców i generowanie kandydatów klastrów (done)
 
 Cel:
 - zbudować warstwę heurystyczną przygotowującą dane dla interpretacji AI
