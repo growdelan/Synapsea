@@ -32,7 +32,7 @@ Zakres:
 
 ---
 
-## Milestone 1: Kontrakty danych i walidacja ryzyk MVP (planned)
+## Milestone 1: Kontrakty danych i walidacja ryzyk MVP (done)
 
 Cel:
 - zredukować ryzyko błędnego kształtu danych wejściowych dla warstwy AI i review

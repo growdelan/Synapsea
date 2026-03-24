@@ -31,4 +31,6 @@ class FileClassifier:
             category=category,
             reason=reason,
             confidence=0.9 if category != "uncategorized" else 0.4,
+            extension=features.extension,
+            tokens=features.tokens,
         )
