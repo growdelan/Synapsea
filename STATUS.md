@@ -28,6 +28,9 @@
 - Przy braku delty przebieg nie wykonuje pełnego przeliczania klastrów.
 - Warstwa AI używa skróconego payloadu klastra, cache fingerprintów i budżetu wywołań na cykl.
 - System utrzymuje kolejkę odroczonych klastrów do dalszej interpretacji AI.
+- Dostępna jest komenda `watch` uruchamiająca tryb ciągłego monitoringu zmian.
+- Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
+- Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -54,12 +57,15 @@
 - Integracja z Ollama została utwardzona przez structured outputs, walidację schematu oraz wydłużony timeout dla wolniejszego modelu lokalnego.
 - Zrealizowano `Milestone 7: Inkrementalny silnik przetwarzania`.
 - Zrealizowano `Milestone 8: Optymalizacja warstwy AI`.
+- Zrealizowano `Milestone 9: Tryb ciągły watch i stabilizacja operacyjna`.
 
 ## Co jest w trakcie
-- `Milestone 9: Tryb ciągły watch i stabilizacja operacyjna` ma status `planned`.
+- Wszystkie milestone’y z bieżącej roadmapy oznaczone jako `planned` zostały zrealizowane.
 
 ## Co jest następne
-- Realizacja `Milestone 9`: komenda `watch` i stabilizacja trybu ciągłego.
+- Wyznaczenie kolejnego zakresu po obecnej roadmapie.
+- Pomiar jakości i skuteczności heurystyk na reprezentatywnych danych produkcyjnych.
+- Dalsza redukcja duplikatów propozycji kategorii przy dużej liczbie podobnych klastrów.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -70,6 +76,7 @@
 - 2026-03-26: dodano `prd/001-incremental-performance-watcher.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 7-9.
 - 2026-03-26: zrealizowano `Milestone 7`, dodając inkrementalne przetwarzanie delty, usuwanie rekordów dla skasowanych plików i testy M7.
 - 2026-03-26: zrealizowano `Milestone 8`, dodając skrócony payload AI, cache propozycji, budżet wywołań i odraczanie klastrów.
+- 2026-03-26: zrealizowano `Milestone 9`, dodając komendę `watch`, monitoring zmian bez bootstrapu i testy odporności watchera.
 - 2026-03-24: wygenerowano i uzupełniono `spec.md` oraz `ROADMAP.md` na podstawie `prd/000-initial-prd.md`.
 - 2026-03-24: doprecyzowano założenia MVP dotyczące systemu operacyjnego, katalogu wejściowego, trybu działania procesu i kryteriów jakości.
 - 2026-03-24: zrealizowano `Milestone 0.5`, dodając bootstrap aplikacji, podstawowy pipeline klasyfikacji, zapis decyzji oraz smoke test.

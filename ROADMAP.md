@@ -213,7 +213,7 @@ Zakres:
 
 ---
 
-## Milestone 9: Tryb ciągły watch i stabilizacja operacyjna (planned)
+## Milestone 9: Tryb ciągły watch i stabilizacja operacyjna (done)
 
 Cel:
 - dostarczyć ciągły tryb pracy oparty na eventach systemowych bez pełnego skanu na starcie
