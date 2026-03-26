@@ -32,6 +32,7 @@
 - Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
+- Review queue deduplikuje propozycje także semantycznie (parent + znormalizowana nazwa kategorii).
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -60,13 +61,12 @@
 - Zrealizowano `Milestone 8: Optymalizacja warstwy AI`.
 - Zrealizowano `Milestone 9: Tryb ciągły watch i stabilizacja operacyjna`.
 - Zrealizowano `Milestone 10: Rozszerzony widok review CLI`.
+- Zrealizowano `Milestone 11: Semantyczna deduplikacja propozycji review`.
 
 ## Co jest w trakcie
-- `Milestone 11: Semantyczna deduplikacja propozycji review` ma status `planned`.
 - `Milestone 12: Ranking i higiena kolejki review` ma status `planned`.
 
 ## Co jest następne
-- Realizacja `Milestone 11`: semantyczna deduplikacja propozycji review.
 - Realizacja `Milestone 12`: ranking i higiena kolejki review.
 
 ## Blokery i ryzyka
@@ -77,6 +77,7 @@
 ## Ostatnie aktualizacje
 - 2026-03-26: dodano `prd/002-review-ux-and-deduplication.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 10-12.
 - 2026-03-26: zrealizowano `Milestone 10`, rozszerzając widok `review` i dodając tryb `--verbose`.
+- 2026-03-26: zrealizowano `Milestone 11`, dodając semantyczną deduplikację propozycji review.
 - 2026-03-26: dodano `prd/001-incremental-performance-watcher.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 7-9.
 - 2026-03-26: zrealizowano `Milestone 7`, dodając inkrementalne przetwarzanie delty, usuwanie rekordów dla skasowanych plików i testy M7.
 - 2026-03-26: zrealizowano `Milestone 8`, dodając skrócony payload AI, cache propozycji, budżet wywołań i odraczanie klastrów.

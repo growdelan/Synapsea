@@ -252,7 +252,7 @@ Zakres:
 
 ---
 
-## Milestone 11: Semantyczna deduplikacja propozycji review (planned)
+## Milestone 11: Semantyczna deduplikacja propozycji review (done)
 
 Cel:
 - wyeliminować powtarzalne propozycje tej samej kategorii pochodzące z różnych klastrów
