@@ -31,6 +31,7 @@ Przeglad propozycji review:
 
 ```bash
 uv run python -m synapsea review --data-dir ./data
+uv run python -m synapsea review --data-dir ./data --verbose
 ```
 
 Zatwierdzenie lub odrzucenie propozycji:
@@ -48,6 +49,9 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
 - Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).
 - `watch` uruchamia pętlę monitoringu i przyjmuje `--watch-interval` (sekundy).
+- `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie i podgląd plików.
+- Kolejka review deduplikuje semantycznie podobne propozycje (np. warianty nazwy różniące się formatowaniem), nie tylko identyczne `cluster_id`.
+- Lista review jest rankowana: najpierw `pending`, potem wyższy confidence i bogatszy kontekst (więcej plików kandydujących).
 - Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
 - Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).

@@ -31,6 +31,9 @@
 - Dostępna jest komenda `watch` uruchamiająca tryb ciągłego monitoringu zmian.
 - Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
+- Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
+- Review queue deduplikuje propozycje także semantycznie (parent + znormalizowana nazwa kategorii).
+- Lista review jest rankowana, aby priorytetyzować najbardziej użyteczne propozycje pending.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -58,14 +61,17 @@
 - Zrealizowano `Milestone 7: Inkrementalny silnik przetwarzania`.
 - Zrealizowano `Milestone 8: Optymalizacja warstwy AI`.
 - Zrealizowano `Milestone 9: Tryb ciągły watch i stabilizacja operacyjna`.
+- Zrealizowano `Milestone 10: Rozszerzony widok review CLI`.
+- Zrealizowano `Milestone 11: Semantyczna deduplikacja propozycji review`.
+- Zrealizowano `Milestone 12: Ranking i higiena kolejki review`.
 
 ## Co jest w trakcie
 - Wszystkie milestone’y z bieżącej roadmapy oznaczone jako `planned` zostały zrealizowane.
 
 ## Co jest następne
 - Wyznaczenie kolejnego zakresu po obecnej roadmapie.
-- Pomiar jakości i skuteczności heurystyk na reprezentatywnych danych produkcyjnych.
-- Dalsza redukcja duplikatów propozycji kategorii przy dużej liczbie podobnych klastrów.
+- Dalsza poprawa jakości propozycji AI dla długich i technicznych ścieżek plików.
+- Rozszerzenie obsługi review o filtrowanie i batchowe decyzje.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -73,6 +79,10 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: dodano `prd/002-review-ux-and-deduplication.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 10-12.
+- 2026-03-26: zrealizowano `Milestone 10`, rozszerzając widok `review` i dodając tryb `--verbose`.
+- 2026-03-26: zrealizowano `Milestone 11`, dodając semantyczną deduplikację propozycji review.
+- 2026-03-26: zrealizowano `Milestone 12`, dodając ranking i porządkowanie kolejki review.
 - 2026-03-26: dodano `prd/001-incremental-performance-watcher.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 7-9.
 - 2026-03-26: zrealizowano `Milestone 7`, dodając inkrementalne przetwarzanie delty, usuwanie rekordów dla skasowanych plików i testy M7.
 - 2026-03-26: zrealizowano `Milestone 8`, dodając skrócony payload AI, cache propozycji, budżet wywołań i odraczanie klastrów.

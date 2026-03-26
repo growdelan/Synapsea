@@ -230,3 +230,63 @@ Zakres:
 - obsługa zdarzeń utworzenia, modyfikacji i usunięcia
 - logika odporności (retry/backoff lub bezpieczne pomijanie błędnych eventów)
 - testy integracyjne trybu watch
+
+---
+
+## Milestone 10: Rozszerzony widok review CLI (done)
+
+Cel:
+- zwiększyć czytelność i użyteczność komendy `review` bez zmiany semantyki `apply/reject`
+- umożliwić podejmowanie decyzji bez ręcznej analizy pliku `review_queue.json`
+
+Definition of Done:
+- `review` pokazuje rozszerzone kolumny kontekstowe (w tym `target_path`, skrócone uzasadnienie, liczba kandydatów)
+- dostępny jest tryb szczegółowy `review --verbose`
+- istnieją testy formattera wyjścia `review` dla trybu podstawowego i szczegółowego
+- komendy `apply` i `reject` działają bez regresji
+
+Zakres:
+- rozszerzenie parsera CLI dla opcji `review --verbose`
+- aktualizacja renderowania listy review w `cli.py`
+- aktualizacja testów CLI review
+
+---
+
+## Milestone 11: Semantyczna deduplikacja propozycji review (done)
+
+Cel:
+- wyeliminować powtarzalne propozycje tej samej kategorii pochodzące z różnych klastrów
+- ustabilizować zachowanie deduplikacji niezależnie od reindexu `cluster_id`
+
+Definition of Done:
+- repozytorium review deduplikuje wpisy po stabilnym kluczu semantycznym
+- normalizacja nazwy propozycji eliminuje duplikaty różniące się jedynie formatowaniem
+- zachowana jest kompatybilność istniejącego formatu `review_queue.json`
+- testy jednostkowe pokrywają scenariusze duplikatów Qt/Info.plist i wariantów nazewnictwa
+
+Zakres:
+- implementacja normalizacji klucza deduplikacyjnego
+- modyfikacja `add_item` w repozytorium review
+- testy deduplikacji semantycznej
+
+Uwagi:
+- milestone redukuje ryzyko nadmiaru pozycji review i szumu decyzyjnego
+
+---
+
+## Milestone 12: Ranking i higiena kolejki review (done)
+
+Cel:
+- uporządkować kolejkę review i promować najbardziej użyteczne propozycje
+- ograniczyć percepcję „zalania” podobnymi wpisami przy dużej liczbie klastrów
+
+Definition of Done:
+- elementy review są prezentowane w stabilnej kolejności preferującej wyższy confidence i bogatszy kontekst
+- system ogranicza widoczny szum poprzez scalanie lub obniżanie priorytetu wpisów podobnych
+- istnieją testy integracyjne jakości kolejki po wielu podobnych klastrach
+- pełny zestaw testów regresyjnych przechodzi
+
+Zakres:
+- wprowadzenie prostego rankingu elementów review
+- uporządkowanie kolejności zapisu/odczytu queue
+- testy integracyjne dla jakości listy review
