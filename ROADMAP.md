@@ -274,7 +274,7 @@ Uwagi:
 
 ---
 
-## Milestone 12: Ranking i higiena kolejki review (planned)
+## Milestone 12: Ranking i higiena kolejki review (done)
 
 Cel:
 - uporządkować kolejkę review i promować najbardziej użyteczne propozycje

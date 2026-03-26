@@ -32,7 +32,7 @@ class ReviewQueueRepository:
                     cluster_id=item["cluster_id"],
                 )
             )
-        return items
+        return sorted(items, key=_review_rank_key)
 
     def add_item(self, item: ReviewItem) -> None:
         payload = self._read()
@@ -115,3 +115,9 @@ def _merge_review_items(existing: dict[str, object], incoming: dict[str, object]
     )
     merged["target_path"] = str(existing.get("target_path") or incoming.get("target_path"))
     return merged
+
+
+def _review_rank_key(item: ReviewItem) -> tuple[int, float, int, str]:
+    pending_rank = 0 if item.status == "pending" else 1
+    # Wyzej: pending, wyzszy confidence i bogatszy kontekst (wiecej kandydatow).
+    return (pending_rank, -item.confidence, -len(item.candidate_files), item.item_id)
