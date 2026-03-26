@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+from io import StringIO
 from pathlib import Path
+from typing import TextIO
 
 from synapsea.config import AppConfig
 from synapsea.pipeline import SynapseaApp
@@ -62,6 +64,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     review_parser = subparsers.add_parser("review", help="Pokaz zapisane propozycje review.")
     review_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    review_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Pokaz rozszerzony widok review z pelnym uzasadnieniem i lista plikow.",
+    )
 
     apply_parser = subparsers.add_parser("apply", help="Zatwierdz propozycje review.")
     apply_parser.add_argument("item_id", help="Id propozycji review.")
@@ -92,11 +99,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "review":
         items = app.list_review_items()
-        for item in items:
-            print(
-                f"{item.item_id}\t{item.status}\t{item.parent_category}\t"
-                f"{item.proposed_category}\t{item.confidence:.2f}"
-            )
+        _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
         applied = app.apply_review_item(args.item_id)
@@ -117,3 +120,29 @@ def main(argv: list[str] | None = None) -> int:
 
     parser.error(f"Nieznana komenda: {args.command}")
     return 2
+
+
+def _print_review_items(items, verbose: bool = False, out: TextIO | None = None) -> None:
+    output = out or StringIO()
+    for item in items:
+        reason = item.reason if verbose else _truncate(item.reason, 60)
+        base = (
+            f"{item.item_id}\t{item.status}\t{item.parent_category}\t"
+            f"{item.proposed_category}\t{item.confidence:.2f}\t"
+            f"{item.target_path}\t{len(item.candidate_files)}\t{reason}"
+        )
+        if verbose:
+            candidate_preview = ",".join(item.candidate_files[:3])
+            line = f"{base}\t{candidate_preview}"
+        else:
+            line = base
+        if out is None:
+            print(line)
+        else:
+            output.write(f"{line}\n")
+
+
+def _truncate(text: str, max_len: int) -> str:
+    if len(text) <= max_len:
+        return text
+    return f"{text[: max_len - 3]}..."

@@ -29,6 +29,7 @@ Opis funkcjonalności na wysokim poziomie:
 - W MVP domyślnym katalogiem monitorowanym jest `~/Downloads`.
 - MVP zakłada pojedynczy katalog wejściowy.
 - W przyroście po MVP (PRD 001) `run` pozostaje trybem jednorazowym, a tryb ciągły jest realizowany osobną komendą `watch`.
+- W kolejnym przyroście (PRD 002) warstwa review jest rozszerzana o czytelniejszy widok CLI oraz deduplikację semantyczną propozycji.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -52,6 +53,7 @@ Opis architektury na poziomie koncepcyjnym.
    - propozycje kategorii lub zmian trafiają do kolejki review,
    - decyzje użytkownika aktualizują stan review, historię decyzji i taksonomię.
    - w przyroście inkrementalnym po MVP (PRD 001) system dodatkowo utrzymuje stan wejścia, wylicza deltę zmian i ogranicza przetwarzanie do plików oraz klastrów dotkniętych zmianą.
+   - w przyroście PRD 002 system dodatkowo normalizuje propozycje review i ogranicza duplikaty semantyczne, zachowując zgodność komend `apply/reject`.
 3. Granice odpowiedzialności
    - komponenty heurystyczne odpowiadają za wykrywanie wzorców i przygotowanie danych wejściowych dla AI,
    - komponent AI odpowiada wyłącznie za interpretację kandydatów i rekomendacje,
@@ -90,6 +92,10 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - wykrywanie zmian `created`, `modified` i `deleted` pomiędzy przebiegami.
 - `ai_proposal_cache` (dotyczy PRD: 001-incremental-performance-watcher.md):
   - cache odpowiedzi AI po fingerprint klastrów, aby unikać powtarzania identycznych zapytań.
+- `review_ranker` (dotyczy PRD: 002-review-ux-and-deduplication.md):
+  - ranking i porządkowanie pozycji review według jakości sygnału i użyteczności dla użytkownika.
+- `review_normalizer` (dotyczy PRD: 002-review-ux-and-deduplication.md):
+  - normalizacja nazw i kluczy deduplikacyjnych dla semantycznie równoważnych propozycji.
 
 ---
 
@@ -157,6 +163,20 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - System musi utrzymywać dodatkowy magazyn cache i kolejkę odroczeń dla klastrów przekraczających budżet.
 
+- Decyzja:
+  - Deduplikacja review po PRD 002 opiera się na stabilnym kluczu semantycznym (parent category + znormalizowana propozycja kategorii), a nie wyłącznie na `cluster_id` (dotyczy PRD: 002-review-ux-and-deduplication.md).
+  Uzasadnienie:
+  - Ten sam lub bardzo podobny pomysł kategorii może pochodzić z wielu klastrów i reindexowanych identyfikatorów.
+  Konsekwencje:
+  - Repozytorium review musi utrzymywać dodatkową logikę normalizacji i zastępowania wpisów o równoważnym znaczeniu.
+
+- Decyzja:
+  - Komenda `review` po PRD 002 pokazuje rozszerzony kontekst propozycji i może mieć tryb szczegółowy, przy zachowaniu zgodności `apply/reject` (dotyczy PRD: 002-review-ux-and-deduplication.md).
+  Uzasadnienie:
+  - Użytkownik musi móc podjąć decyzję bez ręcznego analizowania surowego JSON kolejki.
+  Konsekwencje:
+  - Interfejs CLI review rozszerza format wyjścia i wymaga testów regresyjnych formattera.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -194,4 +214,4 @@ Wspólne wymagania jakościowe dla całego projektu.
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
 - Ostatnia aktualizacja: 2026-03-26
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md` oraz przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md` oraz przyrost review opisany w `prd/002-review-ux-and-deduplication.md`
