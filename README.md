@@ -34,6 +34,7 @@ Przeglad propozycji review:
 ```bash
 uv run python -m synapsea review --data-dir ./data
 uv run python -m synapsea review --data-dir ./data --verbose
+uv run python -m synapsea review --data-dir ./data --all-statuses
 ```
 
 Zatwierdzenie lub odrzucenie propozycji:
@@ -52,6 +53,8 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
 - Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).
 - `watch` uruchamia pętlę monitoringu i przyjmuje `--watch-interval` (sekundy).
+- `review` domyślnie pokazuje tylko pozycje `pending`.
+- `review --all-statuses` pokazuje także pozycje `applied` i `rejected`.
 - `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie i podgląd plików.
 - Kolejka review deduplikuje semantycznie podobne propozycje (np. warianty nazwy różniące się formatowaniem), nie tylko identyczne `cluster_id`.
 - Lista review jest rankowana: najpierw `pending`, potem wyższy confidence i bogatszy kontekst (więcej plików kandydujących).
@@ -63,4 +66,5 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
 - Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.
+- Skanowanie ignoruje ukryte pliki i katalogi (np. `.DS_Store`), aby ograniczyć fałszywe delty.
 - Pasywne uczenie zapisuje sygnały do `learning_signals.json`, a stan poprzedniego przebiegu do `snapshot.json`.

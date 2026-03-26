@@ -81,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Pokaz rozszerzony widok review z pelnym uzasadnieniem i lista plikow.",
     )
+    review_parser.add_argument(
+        "--all-statuses",
+        action="store_true",
+        help="Pokaz wszystkie pozycje review, nie tylko pending.",
+    )
 
     apply_parser = subparsers.add_parser("apply", help="Zatwierdz propozycje review.")
     apply_parser.add_argument("item_id", help="Id propozycji review.")
@@ -112,6 +117,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "review":
         items = app.list_review_items()
+        if not getattr(args, "all_statuses", False):
+            items = [item for item in items if item.status == "pending"]
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":

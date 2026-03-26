@@ -35,8 +35,10 @@
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
 - Komendy `run` i `watch` przyjmują argument `--ollama-model` do wyboru modelu lokalnego per uruchomienie.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
+- Komenda `review` domyślnie pokazuje tylko pozycje `pending`, a `--all-statuses` pokazuje pełny przekrój statusów.
 - Review queue deduplikuje propozycje także semantycznie (parent + znormalizowana nazwa kategorii).
 - Lista review jest rankowana, aby priorytetyzować najbardziej użyteczne propozycje pending.
+- Skaner pomija ukryte pliki i katalogi (np. `.DS_Store`), aby ograniczyć fałszywe delty bez nowych danych użytkownika.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -84,6 +86,8 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: zaktualizowano `review`, aby domyślnie pokazywał tylko `pending`; dodano opcję `--all-statuses`.
+- 2026-03-26: skaner został rozszerzony o ignorowanie ukrytych plików i katalogów (np. `.DS_Store`) oraz test regresyjny.
 - 2026-03-26: zrealizowano `Milestone 14`, dodając argument `--ollama-model` dla komend `run` i `watch` oraz testy regresyjne konfiguracji modelu.
 - 2026-03-26: dodano `prd/003-apply-file-moves-and-ollama-model-cli.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 13-14.
 - 2026-03-26: zrealizowano `Milestone 13`, dodając wykonawcze przenoszenie plików w `apply`, politykę kolizji `skip` i raport `moved/skipped/errors`.
