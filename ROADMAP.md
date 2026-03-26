@@ -193,7 +193,7 @@ Uwagi:
 
 ---
 
-## Milestone 8: Optymalizacja warstwy AI (planned)
+## Milestone 8: Optymalizacja warstwy AI (done)
 
 Cel:
 - zredukować koszt interpretacji AI przy zachowaniu jakości i audytowalności propozycji

@@ -12,6 +12,8 @@ class AppConfig:
     ollama_model: str = "gemma3:4b-it-qat"
     ollama_timeout_seconds: int = 60
     enable_ai_review: bool = True
+    ai_budget_per_cycle: int = 20
+    ai_max_examples: int = 3
 
     @classmethod
     def from_args(
@@ -19,6 +21,8 @@ class AppConfig:
         source: Path | None,
         data_dir: Path | None,
         enable_ai_review: bool = True,
+        ai_budget_per_cycle: int | None = None,
+        ai_max_examples: int | None = None,
     ) -> "AppConfig":
         source_dir = (source or Path("~/Downloads")).expanduser()
         resolved_data_dir = (data_dir or Path("data")).expanduser()
@@ -29,4 +33,6 @@ class AppConfig:
             ollama_model="gemma3:4b-it-qat",
             ollama_timeout_seconds=60,
             enable_ai_review=enable_ai_review,
+            ai_budget_per_cycle=ai_budget_per_cycle if ai_budget_per_cycle is not None else 20,
+            ai_max_examples=ai_max_examples if ai_max_examples is not None else 3,
         )

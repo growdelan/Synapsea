@@ -12,6 +12,7 @@ Przydatne opcje podczas lokalnej pracy:
 
 ```bash
 uv run python -m synapsea run --source ~/Downloads --data-dir ./data
+uv run python -m synapsea run --source ~/Downloads --data-dir ./data --ai-budget 10 --ai-max-examples 2
 ```
 
 Walidacja lokalna bez aktywnego Ollama:
@@ -38,8 +39,11 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Dane aplikacji są zapisywane w katalogu `./data`.
 - Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `gemma3:4b-it-qat`.
 - Domyślny timeout żądania do Ollama wynosi `60` sekund.
+- Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
+- Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).
 - Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
+- Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).
 - Komendy `apply` i `reject` aktualizują status propozycji oraz synchronizują `taxonomy.json`.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.
 - Pasywne uczenie zapisuje sygnały do `learning_signals.json`, a stan poprzedniego przebiegu do `snapshot.json`.

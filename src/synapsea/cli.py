@@ -15,6 +15,18 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
     run_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
     run_parser.add_argument(
+        "--ai-budget",
+        type=int,
+        default=None,
+        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
+    )
+    run_parser.add_argument(
+        "--ai-max-examples",
+        type=int,
+        default=None,
+        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
+    )
+    run_parser.add_argument(
         "--skip-ai",
         action="store_true",
         help="Pomin interpretacje AI i zapis propozycji do review queue.",
@@ -40,6 +52,8 @@ def main(argv: list[str] | None = None) -> int:
         source=getattr(args, "source", None),
         data_dir=getattr(args, "data_dir", None),
         enable_ai_review=not getattr(args, "skip_ai", False),
+        ai_budget_per_cycle=getattr(args, "ai_budget", None),
+        ai_max_examples=getattr(args, "ai_max_examples", None),
     )
     app = SynapseaApp.from_config(config)
 
