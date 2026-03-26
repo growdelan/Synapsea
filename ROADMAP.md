@@ -313,7 +313,7 @@ Zakres:
 
 ---
 
-## Milestone 14: Konfigurowalny model Ollama w CLI run/watch (planned)
+## Milestone 14: Konfigurowalny model Ollama w CLI run/watch (done)
 
 Cel:
 - umożliwić wybór modelu Ollama per uruchomienie bez zmiany kodu i bez utraty kompatybilności CLI

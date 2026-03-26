@@ -33,6 +33,7 @@
 - Dostępna jest komenda `watch` uruchamiająca tryb ciągłego monitoringu zmian.
 - Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
+- Komendy `run` i `watch` przyjmują argument `--ollama-model` do wyboru modelu lokalnego per uruchomienie.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
 - Review queue deduplikuje propozycje także semantycznie (parent + znormalizowana nazwa kategorii).
 - Lista review jest rankowana, aby priorytetyzować najbardziej użyteczne propozycje pending.
@@ -67,12 +68,13 @@
 - Zrealizowano `Milestone 11: Semantyczna deduplikacja propozycji review`.
 - Zrealizowano `Milestone 12: Ranking i higiena kolejki review`.
 - Zrealizowano `Milestone 13: Wykonawcze apply i bezpieczne przenoszenie plików`.
+- Zrealizowano `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
 
 ## Co jest w trakcie
-- Do realizacji pozostaje `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
+- Wszystkie milestone’y z bieżącej roadmapy oznaczone jako `planned` zostały zrealizowane.
 
 ## Co jest następne
-- Realizacja `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
+- Wyznaczenie kolejnego zakresu po obecnej roadmapie.
 - Dalsza poprawa jakości propozycji AI dla długich i technicznych ścieżek plików.
 - Rozszerzenie obsługi review o filtrowanie i batchowe decyzje.
 
@@ -82,6 +84,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: zrealizowano `Milestone 14`, dodając argument `--ollama-model` dla komend `run` i `watch` oraz testy regresyjne konfiguracji modelu.
 - 2026-03-26: dodano `prd/003-apply-file-moves-and-ollama-model-cli.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 13-14.
 - 2026-03-26: zrealizowano `Milestone 13`, dodając wykonawcze przenoszenie plików w `apply`, politykę kolizji `skip` i raport `moved/skipped/errors`.
 - 2026-03-26: dodano `prd/002-review-ux-and-deduplication.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 10-12.
