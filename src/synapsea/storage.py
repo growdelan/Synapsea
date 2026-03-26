@@ -120,3 +120,13 @@ class DecisionLogRepository:
             )
             for row in rows
         ]
+
+    def remove_paths(self, file_paths: list[str]) -> None:
+        if not file_paths:
+            return
+        placeholders = ", ".join("?" for _ in file_paths)
+        with closing(self._connect()) as connection, connection:
+            connection.execute(
+                f"DELETE FROM classification_log WHERE file_path IN ({placeholders})",
+                file_paths,
+            )

@@ -3,14 +3,24 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Iterable
 
+from synapsea.ai_state import AiProposalCacheRepository, DeferredClusterRepository
 from synapsea.candidate_clusters import CandidateClusterRepository
 from synapsea.classifier import FileClassifier
 from synapsea.cluster_engine import ClusterEngine
 from synapsea.config import AppConfig
 from synapsea.evolution_engine import EvolutionEngine
 from synapsea.feature_extractor import FeatureExtractor
+from synapsea.input_state import InputStateRepository
 from synapsea.learning import LearningSignalRepository, SnapshotRepository
-from synapsea.models import CandidateCluster, ClassificationDecision, FileFeatures, LearningSignal, ReviewItem, TaxonomyNode
+from synapsea.models import (
+    CandidateCluster,
+    CategoryProposal,
+    ClassificationDecision,
+    FileFeatures,
+    LearningSignal,
+    ReviewItem,
+    TaxonomyNode,
+)
 from synapsea.ollama_client import HttpOllamaTransport, OllamaClient
 from synapsea.review_queue import ReviewQueueRepository
 from synapsea.scanner import FileScanner
@@ -36,6 +46,10 @@ class SynapseaApp:
         learning_signals: LearningSignalRepository | None = None,
         snapshot_repository: SnapshotRepository | None = None,
         evolution_engine: EvolutionEngine | None = None,
+        input_state_repository: InputStateRepository | None = None,
+        ai_proposal_cache: AiProposalCacheRepository | None = None,
+        deferred_clusters: DeferredClusterRepository | None = None,
+        ai_budget_per_cycle: int = 20,
         proposal_interpreter: OllamaClient | None = None,
         iter_files: FileIterator | None = None,
     ) -> None:
@@ -50,6 +64,10 @@ class SynapseaApp:
         self.taxonomy = taxonomy
         self.learning_signals = learning_signals
         self.snapshot_repository = snapshot_repository
+        self.input_state_repository = input_state_repository
+        self.ai_proposal_cache = ai_proposal_cache
+        self.deferred_clusters = deferred_clusters
+        self.ai_budget_per_cycle = max(1, ai_budget_per_cycle)
         self.evolution_engine = evolution_engine or EvolutionEngine()
         self.proposal_interpreter = proposal_interpreter
         self.iter_files = iter_files or self._iter_source_files
@@ -62,6 +80,9 @@ class SynapseaApp:
         taxonomy = TaxonomyRepository(config.data_dir / "taxonomy.json")
         learning_signals = LearningSignalRepository(config.data_dir / "learning_signals.json")
         snapshot_repository = SnapshotRepository(config.data_dir / "snapshot.json")
+        input_state_repository = InputStateRepository(config.data_dir / "input_state.json")
+        ai_proposal_cache = AiProposalCacheRepository(config.data_dir / "ai_proposal_cache.json")
+        deferred_clusters = DeferredClusterRepository(config.data_dir / "deferred_clusters.json")
         proposal_interpreter = None
         if config.enable_ai_review:
             proposal_interpreter = OllamaClient(
@@ -69,7 +90,8 @@ class SynapseaApp:
                     endpoint=config.ollama_endpoint,
                     model=config.ollama_model,
                     timeout_seconds=config.ollama_timeout_seconds,
-                )
+                ),
+                max_examples=config.ai_max_examples,
             )
         return cls(
             source_dir=config.source_dir,
@@ -79,25 +101,59 @@ class SynapseaApp:
             taxonomy=taxonomy,
             learning_signals=learning_signals,
             snapshot_repository=snapshot_repository,
+            input_state_repository=input_state_repository,
+            ai_proposal_cache=ai_proposal_cache,
+            deferred_clusters=deferred_clusters,
+            ai_budget_per_cycle=config.ai_budget_per_cycle,
             proposal_interpreter=proposal_interpreter,
         )
 
     def run_once(self) -> int:
+        previous_state = self.input_state_repository.load() if self.input_state_repository is not None else {}
+        current_paths = self._collect_current_paths()
+        current_state = self._build_input_state(current_paths)
+
+        created_or_modified, deleted_paths = self._compute_delta(previous_state, current_state)
+        impacted_categories: set[str] = set()
+        if deleted_paths:
+            for decision in self.decision_log.list_all():
+                if decision.file_path in deleted_paths:
+                    impacted_categories.add(decision.category)
+            self.decision_log.remove_paths(sorted(deleted_paths))
+
         processed = 0
-        for path in self.iter_files():
-            if not isinstance(path, Path):
-                continue
+        for path in created_or_modified:
             decision = self.classifier.classify(self.extract_features(path))
             self.decision_log.record(decision)
+            impacted_categories.add(decision.category)
             processed += 1
-        self._capture_passive_learning()
-        self.refresh_candidate_clusters()
+
+        self._capture_passive_learning(current_paths)
+        self.refresh_candidate_clusters(impacted_categories)
+        if self.input_state_repository is not None:
+            self.input_state_repository.save(current_state)
         return processed
 
-    def refresh_candidate_clusters(self) -> list[ClassificationDecision]:
+    def refresh_candidate_clusters(
+        self,
+        affected_categories: set[str] | None = None,
+    ) -> list[ClassificationDecision]:
         decisions = self.decision_log.list_all()
+        if affected_categories is not None and not affected_categories:
+            if self.deferred_clusters is not None and self.deferred_clusters.load():
+                if self.candidate_clusters is not None:
+                    clusters = self.candidate_clusters.load()
+                    self._refresh_review_queue(clusters)
+            return decisions
         if self.candidate_clusters is not None:
-            clusters = self.cluster_engine.build_clusters(decisions)
+            if affected_categories:
+                affected_decisions = [d for d in decisions if d.category in affected_categories]
+                rebuilt = self.cluster_engine.build_clusters(affected_decisions)
+                existing = self.candidate_clusters.load()
+                untouched = [cluster for cluster in existing if cluster.parent_category not in affected_categories]
+                clusters = self._reindex_clusters([*untouched, *rebuilt])
+            else:
+                clusters = self.cluster_engine.build_clusters(decisions)
             self.candidate_clusters.save(clusters)
             self._refresh_review_queue(clusters)
             self._refresh_evolution_queue()
@@ -106,10 +162,20 @@ class SynapseaApp:
     def _refresh_review_queue(self, clusters: list[CandidateCluster]) -> None:
         if self.review_queue is None or self.proposal_interpreter is None:
             return
-        for index, cluster in enumerate(clusters, start=1):
+
+        deferred_ids = set(self.deferred_clusters.load()) if self.deferred_clusters is not None else set()
+        eligible = [cluster for cluster in clusters if cluster.heuristic_score >= 0.7]
+        prioritized = sorted(
+            eligible,
+            key=lambda item: (item.cluster_id not in deferred_ids, -item.heuristic_score),
+        )
+        limited = prioritized[: self.ai_budget_per_cycle]
+        postponed = [cluster.cluster_id for cluster in prioritized[self.ai_budget_per_cycle :]]
+
+        for index, cluster in enumerate(limited, start=1):
             if cluster.heuristic_score < 0.7:
                 continue
-            proposal = self.proposal_interpreter.propose_category(cluster)
+            proposal = self._get_or_create_ai_proposal(cluster)
             if not proposal.should_create_category or proposal.confidence < 0.7:
                 continue
             review_item = ReviewItem.from_cluster(
@@ -118,9 +184,85 @@ class SynapseaApp:
                 item_id=f"rev_{index:03d}",
             )
             self.review_queue.add_item(review_item)
+        if self.deferred_clusters is not None:
+            self.deferred_clusters.save(postponed)
+
+    def _get_or_create_ai_proposal(self, cluster: CandidateCluster) -> CategoryProposal:
+        if not hasattr(self.proposal_interpreter, "build_cluster_fingerprint"):
+            return self.proposal_interpreter.propose_category(cluster)
+
+        fingerprint = self.proposal_interpreter.build_cluster_fingerprint(cluster)
+        if self.ai_proposal_cache is not None:
+            cached = self.ai_proposal_cache.get(fingerprint)
+            if cached is not None:
+                return cached
+        proposal = self.proposal_interpreter.propose_category(cluster)
+        if self.ai_proposal_cache is not None:
+            self.ai_proposal_cache.set(fingerprint, proposal)
+        return proposal
 
     def _iter_source_files(self) -> Iterable[Path]:
         yield from self.scanner.scan(self.source_dir)
+
+    def _collect_current_paths(self) -> list[Path]:
+        current: list[Path] = []
+        for path in self.iter_files():
+            if isinstance(path, Path):
+                current.append(path)
+        return current
+
+    def _build_input_state(self, paths: list[Path]) -> dict[str, dict[str, int]]:
+        state: dict[str, dict[str, int]] = {}
+        for path in paths:
+            try:
+                stat = path.stat()
+                inode = int(stat.st_ino)
+                size = int(stat.st_size)
+                mtime_ns = int(stat.st_mtime_ns)
+            except FileNotFoundError:
+                inode = 0
+                size = 0
+                mtime_ns = 0
+            state[str(path)] = {
+                "inode": inode,
+                "size": size,
+                "mtime_ns": mtime_ns,
+            }
+        return state
+
+    def _compute_delta(
+        self,
+        previous: dict[str, dict[str, int]],
+        current: dict[str, dict[str, int]],
+    ) -> tuple[list[Path], set[str]]:
+        changed_paths: list[Path] = []
+        for file_path, state in current.items():
+            if previous.get(file_path) != state:
+                changed_paths.append(Path(file_path))
+        deleted = set(previous.keys()).difference(current.keys())
+        return changed_paths, deleted
+
+    def _reindex_clusters(self, clusters: list[CandidateCluster]) -> list[CandidateCluster]:
+        reordered: list[CandidateCluster] = []
+        for index, cluster in enumerate(
+            sorted(clusters, key=lambda item: (item.parent_category, item.cluster_type, item.top_tokens)),
+            start=1,
+        ):
+            reordered.append(
+                CandidateCluster(
+                    cluster_id=f"cluster_{index:03d}",
+                    parent_category=cluster.parent_category,
+                    file_count=cluster.file_count,
+                    dominant_extensions=list(cluster.dominant_extensions),
+                    top_tokens=list(cluster.top_tokens),
+                    pattern_signals=dict(cluster.pattern_signals),
+                    example_files=list(cluster.example_files),
+                    candidate_files=list(cluster.candidate_files),
+                    heuristic_score=cluster.heuristic_score,
+                    cluster_type=cluster.cluster_type,
+                )
+            )
+        return reordered
 
     def extract_features(self, path: Path) -> FileFeatures:
         return self.feature_extractor.extract(path)
@@ -166,12 +308,12 @@ class SynapseaApp:
         )
         return item
 
-    def _capture_passive_learning(self) -> None:
+    def _capture_passive_learning(self, current_paths: list[Path] | None = None) -> None:
         if self.snapshot_repository is None:
             return
         previous = self.snapshot_repository.load()
         current: dict[str, str] = {}
-        for path in self._iter_source_files():
+        for path in current_paths if current_paths is not None else self._iter_source_files():
             inode = str(path.stat().st_ino)
             current[inode] = str(path)
             old_path = previous.get(inode)

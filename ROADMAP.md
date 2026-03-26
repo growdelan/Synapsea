@@ -167,3 +167,66 @@ Zakres:
 
 Uwagi:
 - milestone wykracza poza minimalne MVP, ale wynika z głównej wizji produktu
+
+---
+
+## Milestone 7: Inkrementalny silnik przetwarzania (done)
+
+Cel:
+- ograniczyć koszt przebiegu do realnej delty zmian w folderze źródłowym
+- zredukować ryzyko regresji wydajności przy rosnącej historii danych
+
+Definition of Done:
+- system utrzymuje trwały stan wejścia i wylicza deltę `created/modified/deleted`
+- klasyfikacja i aktualizacja historii decyzji działają dla delty bez pełnego reprocessingu
+- klastrowanie przelicza tylko obszary dotknięte zmianą
+- dwa kolejne uruchomienia `run` bez zmian wejścia nie wykonują pełnej pracy jak przy pierwszym przebiegu
+
+Zakres:
+- dodanie repozytorium stanu wejścia i mechanizmu wyliczania delty
+- aktualizacja pipeline do przetwarzania inkrementalnego
+- dostosowanie zapisu i usuwania rekordów historii klasyfikacji dla plików usuniętych
+- testy jednostkowe i integracyjne dla scenariuszy create/modify/delete
+
+Uwagi:
+- milestone redukcji ryzyka dla dużego przyrostu wydajnościowego (PRD 001)
+
+---
+
+## Milestone 8: Optymalizacja warstwy AI (done)
+
+Cel:
+- zredukować koszt interpretacji AI przy zachowaniu jakości i audytowalności propozycji
+- ograniczyć liczbę i rozmiar zapytań do lokalnego modelu
+
+Definition of Done:
+- payload dla interpretacji klastra jest skrócony i nie zawiera pełnej listy `candidate_files`
+- działa cache propozycji AI po fingerprint klastra
+- istnieje budżet liczby wywołań AI per cykl i mechanizm odraczania nadmiarowych klastrów
+- liczba realnych wywołań AI dla niezmienionych danych jest istotnie niższa niż bez cache
+
+Zakres:
+- redukcja kontraktu wejściowego do warstwy Ollama
+- dodanie trwałego magazynu cache odpowiedzi AI
+- dodanie konfiguracji budżetu AI i obsługi odroczeń
+- testy dla fingerprint, cache hit/miss i limitu wywołań
+
+---
+
+## Milestone 9: Tryb ciągły watch i stabilizacja operacyjna (done)
+
+Cel:
+- dostarczyć ciągły tryb pracy oparty na eventach systemowych bez pełnego skanu na starcie
+- zapewnić odporność działania watchera na błędy runtime i odpowiedzi AI
+
+Definition of Done:
+- dostępna jest komenda CLI `watch` dla ciągłego monitorowania
+- watcher startuje bez bootstrap pełnego skanu i reaguje na nowe eventy
+- mikro-przebiegi uruchamiane przez eventy korzystają z inkrementalnego pipeline
+- błąd pojedynczego eventu lub pojedynczego zapytania AI nie zatrzymuje całego procesu watchera
+
+Zakres:
+- implementacja pętli watchera i integracja z CLI
+- obsługa zdarzeń utworzenia, modyfikacji i usunięcia
+- logika odporności (retry/backoff lub bezpieczne pomijanie błędnych eventów)
+- testy integracyjne trybu watch

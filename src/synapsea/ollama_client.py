@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from dataclasses import dataclass
 from typing import Any, Protocol
 from urllib import request
@@ -60,13 +61,31 @@ class HttpOllamaTransport:
 
 
 class OllamaClient:
-    def __init__(self, transport: OllamaTransport) -> None:
+    def __init__(self, transport: OllamaTransport, max_examples: int = 3) -> None:
         self.transport = transport
+        self.max_examples = max(1, max_examples)
+
+    def build_cluster_fingerprint(self, cluster: CandidateCluster) -> str:
+        summary = self._build_cluster_summary(cluster)
+        raw = json.dumps(summary, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+    def _build_cluster_summary(self, cluster: CandidateCluster) -> dict[str, object]:
+        return {
+            "parent_category": cluster.parent_category,
+            "file_count": cluster.file_count,
+            "dominant_extensions": cluster.dominant_extensions,
+            "top_tokens": cluster.top_tokens,
+            "pattern_signals": cluster.pattern_signals,
+            "example_files": cluster.example_files[: self.max_examples],
+            "cluster_type": cluster.cluster_type,
+            "heuristic_score": cluster.heuristic_score,
+        }
 
     def propose_category(self, cluster: CandidateCluster) -> CategoryProposal:
         schema = CategoryProposalSchema.model_json_schema()
         payload = {
-            "cluster": cluster.to_dict(),
+            "cluster": self._build_cluster_summary(cluster),
             "instructions": (
                 "Oceń czy warto utworzyć kategorię. "
                 "Odpowiedz JSON-em z polami should_create_category, "

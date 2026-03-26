@@ -5,6 +5,7 @@ from pathlib import Path
 
 from synapsea.config import AppConfig
 from synapsea.pipeline import SynapseaApp
+from synapsea.watcher import WatchService
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -14,6 +15,45 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser = subparsers.add_parser("run", help="Uruchom pipeline klasyfikacji.")
     run_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
     run_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    run_parser.add_argument(
+        "--ai-budget",
+        type=int,
+        default=None,
+        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
+    )
+    run_parser.add_argument(
+        "--ai-max-examples",
+        type=int,
+        default=None,
+        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
+    )
+
+    watch_parser = subparsers.add_parser("watch", help="Uruchom ciagly monitoring zmian w katalogu.")
+    watch_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
+    watch_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    watch_parser.add_argument(
+        "--skip-ai",
+        action="store_true",
+        help="Pomin interpretacje AI i zapis propozycji do review queue.",
+    )
+    watch_parser.add_argument(
+        "--ai-budget",
+        type=int,
+        default=None,
+        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
+    )
+    watch_parser.add_argument(
+        "--ai-max-examples",
+        type=int,
+        default=None,
+        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
+    )
+    watch_parser.add_argument(
+        "--watch-interval",
+        type=float,
+        default=None,
+        help="Interwal odswiezania watchera w sekundach.",
+    )
     run_parser.add_argument(
         "--skip-ai",
         action="store_true",
@@ -40,6 +80,9 @@ def main(argv: list[str] | None = None) -> int:
         source=getattr(args, "source", None),
         data_dir=getattr(args, "data_dir", None),
         enable_ai_review=not getattr(args, "skip_ai", False),
+        ai_budget_per_cycle=getattr(args, "ai_budget", None),
+        ai_max_examples=getattr(args, "ai_max_examples", None),
+        watch_poll_interval_seconds=getattr(args, "watch_interval", None),
     )
     app = SynapseaApp.from_config(config)
 
@@ -62,6 +105,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "reject":
         rejected = app.reject_review_item(args.item_id)
         print(f"Rejected {rejected.item_id}")
+        return 0
+    if args.command == "watch":
+        watcher = WatchService(
+            app=app,
+            source_dir=config.source_dir,
+            poll_interval_seconds=config.watch_poll_interval_seconds,
+        )
+        watcher.run_forever()
         return 0
 
     parser.error(f"Nieznana komenda: {args.command}")
