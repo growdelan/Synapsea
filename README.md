@@ -56,6 +56,8 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
 - Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).
 - `watch` startuje bez bootstrapowego przetwarzania istniejącego katalogu i reaguje na zmiany od momentu uruchomienia.
-- Komendy `apply` i `reject` aktualizują status propozycji oraz synchronizują `taxonomy.json`.
+- Komenda `apply` aktualizuje status propozycji, synchronizuje `taxonomy.json` i wykonuje przeniesienie plików `candidate_files` do docelowej sciezki kategorii.
+- Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
+- Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.
 - Pasywne uczenie zapisuje sygnały do `learning_signals.json`, a stan poprzedniego przebiegu do `snapshot.json`.

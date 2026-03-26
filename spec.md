@@ -4,7 +4,7 @@
 Krótki opis celu aplikacji:
 - Rozwiązuje problem chaotycznej, ręcznie utrzymywanej struktury plików poprzez lokalne analizowanie plików, wykrywanie wzorców i proponowanie sensownej, rozwijającej się taksonomii danych.
 - Jest skierowana do użytkownika pracującego lokalnie na własnych zbiorach plików, który chce porządkować dane bez stałego ręcznego kategoryzowania.
-- Zakres obejmuje lokalną klasyfikację plików, ekstrakcję cech, wykrywanie wzorców, generowanie propozycji zmian w strukturze oraz obsługę review przez CLI.
+- Zakres obejmuje lokalną klasyfikację plików, ekstrakcję cech, wykrywanie wzorców, generowanie propozycji zmian w strukturze, obsługę review przez CLI oraz wykonawcze przenoszenie plików po zatwierdzeniu propozycji.
 - Poza zakresem MVP są: GUI, pełna automatyzacja zmian bez zgody użytkownika, zaawansowane embeddings, integracje z zewnętrznymi usługami oraz przetwarzanie wieloźródłowe.
 - Pierwsza wersja wspiera wyłącznie środowisko macOS.
 
@@ -22,7 +22,8 @@ Opis funkcjonalności na wysokim poziomie:
   - system skanuje pliki, wyciąga cechy i zapisuje decyzje klasyfikacyjne,
   - silnik wzorców buduje kandydatów na klastry,
   - warstwa AI interpretuje klastry i zapisuje propozycje do kolejki review,
-  - użytkownik przegląda, akceptuje lub odrzuca propozycje przez CLI.
+  - użytkownik przegląda, akceptuje lub odrzuca propozycje przez CLI,
+  - zatwierdzenie propozycji przez `apply` może uruchomić faktyczne przeniesienia plików kandydujących do docelowej ścieżki kategorii.
 - Aplikacja **nie** wykonuje automatycznych zmian w strukturze plików bez decyzji użytkownika.
 - Aplikacja **nie** dostarcza interfejsu graficznego w MVP.
 - Aplikacja **nie** wysyła danych poza lokalną maszynę.
@@ -30,6 +31,7 @@ Opis funkcjonalności na wysokim poziomie:
 - MVP zakłada pojedynczy katalog wejściowy.
 - W przyroście po MVP (PRD 001) `run` pozostaje trybem jednorazowym, a tryb ciągły jest realizowany osobną komendą `watch`.
 - W kolejnym przyroście (PRD 002) warstwa review jest rozszerzana o czytelniejszy widok CLI oraz deduplikację semantyczną propozycji.
+- W kolejnym przyroście (PRD 003) `apply` może wykonywać przeniesienia plików po akceptacji review, a komendy `run/watch` przyjmują argument wyboru modelu `--ollama-model`.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -52,6 +54,7 @@ Opis architektury na poziomie koncepcyjnym.
    - kandydaci na klastry są oceniani przez warstwę AI,
    - propozycje kategorii lub zmian trafiają do kolejki review,
    - decyzje użytkownika aktualizują stan review, historię decyzji i taksonomię.
+   - przy `apply` (PRD 003) akceptacja może dodatkowo uruchomić wykonawcze przeniesienia plików `candidate_files` do ścieżki `target_path`.
    - w przyroście inkrementalnym po MVP (PRD 001) system dodatkowo utrzymuje stan wejścia, wylicza deltę zmian i ogranicza przetwarzanie do plików oraz klastrów dotkniętych zmianą.
    - w przyroście PRD 002 system dodatkowo normalizuje propozycje review i ogranicza duplikaty semantyczne, zachowując zgodność komend `apply/reject`.
 3. Granice odpowiedzialności
@@ -84,6 +87,9 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - trwałe przechowywanie taksonomii, kolejki review i historii decyzji.
 - CLI:
   - uruchamianie procesu, przegląd sugestii oraz akceptacja lub odrzucanie decyzji.
+- `apply_executor` (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md):
+  - wykonawcza warstwa przenoszenia plików po zatwierdzeniu review item przez `apply`.
+  - obsługa polityki kolizji `skip + raport` bez nadpisywania istniejących plików.
 - monitor procesu:
   - po MVP uruchamiany ręcznie przez komendę `watch`, działający ciągle i oczekujący na zdarzenia w folderze źródłowym.
 - `input_state_repository` (dotyczy PRD: 001-incremental-performance-watcher.md):
@@ -177,6 +183,27 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Interfejs CLI review rozszerza format wyjścia i wymaga testów regresyjnych formattera.
 
+- Decyzja:
+  - Komenda `apply` po PRD 003 wykonuje faktyczne przeniesienia plików `candidate_files` do docelowej ścieżki kategorii, ale tylko po ręcznej akceptacji review (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md).
+  Uzasadnienie:
+  - Należy domknąć przepływ od propozycji do wykonania operacji na plikach bez łamania zasady human-in-the-loop.
+  Konsekwencje:
+  - `apply` staje się operacją wykonawczą na systemie plików i wymaga raportowania wyniku przeniesień.
+
+- Decyzja:
+  - Warstwa CLI udostępnia wybór modelu lokalnego przez argument `--ollama-model` dla komend `run` i `watch` (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md).
+  Uzasadnienie:
+  - Użytkownik potrzebuje sterowania modelem per uruchomienie bez zmiany kodu i bez utraty domyślnej konfiguracji.
+  Konsekwencje:
+  - Konfiguracja runtime przekazuje nazwę modelu do klienta Ollama, a testy CLI obejmują nowy argument.
+
+- Decyzja:
+  - Polityka kolizji podczas przenoszeń `apply` to `skip + raport` (brak nadpisywania plików docelowych) (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md).
+  Uzasadnienie:
+  - Priorytetem jest bezpieczeństwo danych i brak utraty istniejących plików.
+  Konsekwencje:
+  - Wynik `apply` musi raportować liczbę kolizji i pominiętych plików.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -214,4 +241,4 @@ Wspólne wymagania jakościowe dla całego projektu.
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
 - Ostatnia aktualizacja: 2026-03-26
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md` oraz przyrost review opisany w `prd/002-review-ux-and-deduplication.md`
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md` oraz przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`

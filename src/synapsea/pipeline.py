@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
+import shutil
 from typing import Callable, Iterable
 
 from synapsea.ai_state import AiProposalCacheRepository, DeferredClusterRepository
@@ -29,6 +31,13 @@ from synapsea.taxonomy import TaxonomyRepository
 
 
 FileIterator = Callable[[], Iterable[Path]]
+
+
+@dataclass(slots=True)
+class ApplyMoveReport:
+    moved: int = 0
+    skipped: int = 0
+    errors: int = 0
 
 
 class SynapseaApp:
@@ -272,7 +281,7 @@ class SynapseaApp:
             return []
         return self.review_queue.list_items()
 
-    def apply_review_item(self, item_id: str) -> ReviewItem:
+    def apply_review_item(self, item_id: str) -> tuple[ReviewItem, ApplyMoveReport]:
         if self.review_queue is None or self.taxonomy is None:
             raise RuntimeError("Brak skonfigurowanej review queue lub taksonomii.")
         item = self.review_queue.update_status(item_id, "applied")
@@ -294,7 +303,32 @@ class SynapseaApp:
             file_path=item.target_path,
             details={"proposed_category": item.proposed_category},
         )
-        return item
+        move_report = self._move_candidate_files(item)
+        return item, move_report
+
+    def _move_candidate_files(self, item: ReviewItem) -> ApplyMoveReport:
+        report = ApplyMoveReport()
+        destination_dir = self.source_dir / item.target_path
+
+        for candidate in item.candidate_files:
+            source_path = Path(candidate)
+            destination_path = destination_dir / source_path.name
+
+            if not source_path.exists():
+                report.errors += 1
+                continue
+
+            if destination_path.exists():
+                report.skipped += 1
+                continue
+
+            try:
+                destination_dir.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(source_path), str(destination_path))
+                report.moved += 1
+            except OSError:
+                report.errors += 1
+        return report
 
     def reject_review_item(self, item_id: str) -> ReviewItem:
         if self.review_queue is None:

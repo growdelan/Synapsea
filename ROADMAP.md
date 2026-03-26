@@ -290,3 +290,42 @@ Zakres:
 - wprowadzenie prostego rankingu elementów review
 - uporządkowanie kolejności zapisu/odczytu queue
 - testy integracyjne dla jakości listy review
+
+---
+
+## Milestone 13: Wykonawcze apply i bezpieczne przenoszenie plików (done)
+
+Cel:
+- domknąć przepływ review o realne wykonanie operacji na plikach po zatwierdzeniu propozycji
+- zapewnić bezpieczne przenoszenie bez nadpisywania danych przy kolizjach nazw
+
+Definition of Done:
+- `apply` po akceptacji propozycji wykonuje przeniesienie plików `candidate_files` do `target_path` w drzewie źródłowym
+- wynik `apply` raportuje co najmniej liczbę plików przeniesionych, pominiętych i błędnych
+- kolizje nazw nie nadpisują plików docelowych i są raportowane jako pominięte
+- testy obejmują scenariusze sukcesu, kolizji i częściowych błędów I/O
+
+Zakres:
+- dodanie warstwy wykonawczej przenoszeń uruchamianej przez komendę `apply`
+- przygotowanie katalogów docelowych kategorii przed przeniesieniem
+- implementacja polityki kolizji `skip + raport`
+- testy jednostkowe/integracyjne dla wykonawczego `apply`
+
+---
+
+## Milestone 14: Konfigurowalny model Ollama w CLI run/watch (planned)
+
+Cel:
+- umożliwić wybór modelu Ollama per uruchomienie bez zmiany kodu i bez utraty kompatybilności CLI
+- utrzymać dotychczasowe zachowanie domyślne przy braku nowego argumentu
+
+Definition of Done:
+- komendy `run` i `watch` przyjmują argument `--ollama-model`
+- wskazany model jest przekazywany do warstwy Ollama dla bieżącego przebiegu
+- brak podanego argumentu zachowuje domyślny model projektu
+- testy regresyjne CLI i pipeline przechodzą dla wariantu domyślnego i jawnie wskazanego modelu
+
+Zakres:
+- rozszerzenie parsera CLI dla `run` i `watch` o opcję `--ollama-model`
+- rozszerzenie konfiguracji runtime i przekazania modelu do klienta Ollama
+- aktualizacja dokumentacji uruchomienia oraz testów CLI/pipeline

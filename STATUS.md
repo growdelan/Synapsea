@@ -20,6 +20,8 @@
 - Warstwa Ollama korzysta ze structured outputs z walidacją przez `pydantic` zamiast opierać się na swobodnym parsowaniu tekstu.
 - Dostępne są komendy CLI `review`, `apply` i `reject`.
 - Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
+- `apply` wykonuje faktyczne przeniesienia plików `candidate_files` do docelowej ścieżki kategorii.
+- Podczas `apply` kolizje nazw są obsługiwane polityką `skip` (bez nadpisywania), a wynik zawiera liczniki `moved/skipped/errors`.
 - Pipeline zapisuje sygnały pasywnego uczenia w `learning_signals.json` i snapshoty obserwowanego drzewa plików.
 - Silnik ewolucji potrafi generować dodatkowe propozycje review dla podkategorii, merge oraz martwych kategorii.
 - Potwierdzono lokalne uruchomienie pełnego przebiegu z modelem `gemma3:4b-it-qat`.
@@ -64,12 +66,13 @@
 - Zrealizowano `Milestone 10: Rozszerzony widok review CLI`.
 - Zrealizowano `Milestone 11: Semantyczna deduplikacja propozycji review`.
 - Zrealizowano `Milestone 12: Ranking i higiena kolejki review`.
+- Zrealizowano `Milestone 13: Wykonawcze apply i bezpieczne przenoszenie plików`.
 
 ## Co jest w trakcie
-- Wszystkie milestone’y z bieżącej roadmapy oznaczone jako `planned` zostały zrealizowane.
+- Do realizacji pozostaje `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
 
 ## Co jest następne
-- Wyznaczenie kolejnego zakresu po obecnej roadmapie.
+- Realizacja `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
 - Dalsza poprawa jakości propozycji AI dla długich i technicznych ścieżek plików.
 - Rozszerzenie obsługi review o filtrowanie i batchowe decyzje.
 
@@ -79,6 +82,8 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: dodano `prd/003-apply-file-moves-and-ollama-model-cli.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 13-14.
+- 2026-03-26: zrealizowano `Milestone 13`, dodając wykonawcze przenoszenie plików w `apply`, politykę kolizji `skip` i raport `moved/skipped/errors`.
 - 2026-03-26: dodano `prd/002-review-ux-and-deduplication.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 10-12.
 - 2026-03-26: zrealizowano `Milestone 10`, rozszerzając widok `review` i dodając tryb `--verbose`.
 - 2026-03-26: zrealizowano `Milestone 11`, dodając semantyczną deduplikację propozycji review.

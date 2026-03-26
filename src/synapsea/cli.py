@@ -102,8 +102,11 @@ def main(argv: list[str] | None = None) -> int:
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
-        applied = app.apply_review_item(args.item_id)
-        print(f"Applied {applied.item_id} -> {applied.target_path}")
+        applied, report = app.apply_review_item(args.item_id)
+        print(
+            f"Applied {applied.item_id} -> {applied.target_path} "
+            f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
+        )
         return 0
     if args.command == "reject":
         rejected = app.reject_review_item(args.item_id)
