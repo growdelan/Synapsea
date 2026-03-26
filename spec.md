@@ -28,6 +28,7 @@ Opis funkcjonalności na wysokim poziomie:
 - Aplikacja **nie** wysyła danych poza lokalną maszynę.
 - W MVP domyślnym katalogiem monitorowanym jest `~/Downloads`.
 - MVP zakłada pojedynczy katalog wejściowy.
+- W przyroście po MVP (PRD 001) `run` pozostaje trybem jednorazowym, a tryb ciągły jest realizowany osobną komendą `watch`.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -50,6 +51,7 @@ Opis architektury na poziomie koncepcyjnym.
    - kandydaci na klastry są oceniani przez warstwę AI,
    - propozycje kategorii lub zmian trafiają do kolejki review,
    - decyzje użytkownika aktualizują stan review, historię decyzji i taksonomię.
+   - w przyroście inkrementalnym po MVP (PRD 001) system dodatkowo utrzymuje stan wejścia, wylicza deltę zmian i ogranicza przetwarzanie do plików oraz klastrów dotkniętych zmianą.
 3. Granice odpowiedzialności
    - komponenty heurystyczne odpowiadają za wykrywanie wzorców i przygotowanie danych wejściowych dla AI,
    - komponent AI odpowiada wyłącznie za interpretację kandydatów i rekomendacje,
@@ -81,7 +83,13 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
 - CLI:
   - uruchamianie procesu, przegląd sugestii oraz akceptacja lub odrzucanie decyzji.
 - monitor procesu:
-  - uruchamiany ręcznie proces działający ciągle po starcie i oczekujący na zdarzenia w folderze `~/Downloads`.
+  - po MVP uruchamiany ręcznie przez komendę `watch`, działający ciągle i oczekujący na zdarzenia w folderze źródłowym.
+- `input_state_repository` (dotyczy PRD: 001-incremental-performance-watcher.md):
+  - utrzymywanie trwałego stanu wejścia (inode, mtime, size) do wyliczania delty zmian.
+- `delta_engine` (dotyczy PRD: 001-incremental-performance-watcher.md):
+  - wykrywanie zmian `created`, `modified` i `deleted` pomiędzy przebiegami.
+- `ai_proposal_cache` (dotyczy PRD: 001-incremental-performance-watcher.md):
+  - cache odpowiedzi AI po fingerprint klastrów, aby unikać powtarzania identycznych zapytań.
 
 ---
 
@@ -128,6 +136,27 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Repo dodaje zależność `pydantic`, ale integracja AI jest bardziej deterministyczna i odporniejsza na błędy parsowania.
 
+- Decyzja:
+  - Inkrementalny tryb po MVP przetwarza tylko deltę zmian plików oraz ogranicza AI do nowych lub zmienionych klastrów (dotyczy PRD: 001-incremental-performance-watcher.md).
+  Uzasadnienie:
+  - Problem wydajności wynika z pełnego reprocessingu i rosnącej liczby wywołań AI wraz ze wzrostem historii danych.
+  Konsekwencje:
+  - Wymagane jest trwałe utrzymywanie stanu wejścia oraz mechanizm wyliczania delty przed etapem klasyfikacji i klastrowania.
+
+- Decyzja:
+  - `run` pozostaje komendą one-shot, a tryb ciągły jest realizowany przez osobną komendę `watch` (dotyczy PRD: 001-incremental-performance-watcher.md).
+  Uzasadnienie:
+  - Zachowanie kompatybilności obecnych scenariuszy CLI i czytelne rozdzielenie trybu wsadowego od ciągłego.
+  Konsekwencje:
+  - Interfejs CLI rozszerza się o nową komendę oraz parametry watchera, ale bez zmiany semantyki istniejących komend review/apply/reject.
+
+- Decyzja:
+  - Warstwa AI używa cache po fingerprint klastra oraz budżetu wywołań per cykl (dotyczy PRD: 001-incremental-performance-watcher.md).
+  Uzasadnienie:
+  - Należy ograniczyć koszt lokalnego modelu przy zachowaniu audytowalności i jakości propozycji.
+  Konsekwencje:
+  - System musi utrzymywać dodatkowy magazyn cache i kolejkę odroczeń dla klastrów przekraczających budżet.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -164,5 +193,5 @@ Wspólne wymagania jakościowe dla całego projektu.
 
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
-- Ostatnia aktualizacja: 2026-03-24
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`
+- Ostatnia aktualizacja: 2026-03-26
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md` oraz przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`

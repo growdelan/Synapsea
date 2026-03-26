@@ -2,6 +2,7 @@
 
 ## Co działa
 - Istnieje bazowy opis produktu w `prd/000-initial-prd.md`.
+- Istnieje przyrostowy opis wydajności i trybu watch w `prd/001-incremental-performance-watcher.md`.
 - Istnieje uzupełniona specyfikacja wysokopoziomowa w `spec.md`.
 - Istnieje rozbita roadmapa milestone'ów w `ROADMAP.md`, zaczynająca się od `Milestone 0.5`.
 - Działa minimalny entrypoint CLI `synapsea run` uruchamiany przez `uv`.
@@ -22,6 +23,9 @@
 - Pipeline zapisuje sygnały pasywnego uczenia w `learning_signals.json` i snapshoty obserwowanego drzewa plików.
 - Silnik ewolucji potrafi generować dodatkowe propozycje review dla podkategorii, merge oraz martwych kategorii.
 - Potwierdzono lokalne uruchomienie pełnego przebiegu z modelem `gemma3:4b-it-qat`.
+- Pipeline utrzymuje stan wejścia (`input_state.json`) i wylicza deltę zmian `created/modified/deleted`.
+- `run` klasyfikuje tylko pliki z delty oraz usuwa rekordy historii dla plików usuniętych.
+- Przy braku delty przebieg nie wykonuje pełnego przeliczania klastrów.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -46,15 +50,15 @@
 - Zrealizowano `Milestone 6: Pasywne uczenie i ewolucja taksonomii`.
 - Repo ma już pełną pętlę: klasyfikacja, klastrowanie, review, taksonomia oraz sygnały uczenia do dalszej ewolucji.
 - Integracja z Ollama została utwardzona przez structured outputs, walidację schematu oraz wydłużony timeout dla wolniejszego modelu lokalnego.
+- Zrealizowano `Milestone 7: Inkrementalny silnik przetwarzania`.
 
 ## Co jest w trakcie
-- Wszystkie milestone’y z bieżącej roadmapy oznaczone wcześniej jako `planned` zostały zrealizowane.
-- Projekt jest gotowy na kolejny etap planowania lub doprecyzowanie następnego przyrostu.
+- `Milestone 8: Optymalizacja warstwy AI` ma status `planned`.
+- `Milestone 9: Tryb ciągły watch i stabilizacja operacyjna` ma status `planned`.
 
 ## Co jest następne
-- Wyznaczenie kolejnego zakresu po obecnej roadmapie.
-- Doprecyzowanie jakości heurystyk i skuteczności klasyfikacji na rzeczywistym zbiorze plików.
-- Redukcja liczby zduplikowanych propozycji kategorii generowanych z wielu podobnych klastrów.
+- Realizacja `Milestone 8`: redukcja payloadu AI, cache i budżet wywołań.
+- Realizacja `Milestone 9`: komenda `watch` i stabilizacja trybu ciągłego.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -62,6 +66,8 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: dodano `prd/001-incremental-performance-watcher.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 7-9.
+- 2026-03-26: zrealizowano `Milestone 7`, dodając inkrementalne przetwarzanie delty, usuwanie rekordów dla skasowanych plików i testy M7.
 - 2026-03-24: wygenerowano i uzupełniono `spec.md` oraz `ROADMAP.md` na podstawie `prd/000-initial-prd.md`.
 - 2026-03-24: doprecyzowano założenia MVP dotyczące systemu operacyjnego, katalogu wejściowego, trybu działania procesu i kryteriów jakości.
 - 2026-03-24: zrealizowano `Milestone 0.5`, dodając bootstrap aplikacji, podstawowy pipeline klasyfikacji, zapis decyzji oraz smoke test.

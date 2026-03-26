@@ -40,7 +40,7 @@ class Milestone2ClassificationTest(unittest.TestCase):
             decisions = DecisionLogRepository(data_dir / "classification_log.db").list_all()
 
             self.assertEqual(first_processed, 2)
-            self.assertEqual(second_processed, 2)
+            self.assertEqual(second_processed, 0)
             self.assertEqual(len(decisions), 2)
             self.assertEqual(decisions[0].category, "images")
             self.assertIn("screenshot_like", decisions[0].heuristic_classes)
