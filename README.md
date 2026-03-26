@@ -13,6 +13,7 @@ Przydatne opcje podczas lokalnej pracy:
 ```bash
 uv run python -m synapsea run --source ~/Downloads --data-dir ./data
 uv run python -m synapsea run --source ~/Downloads --data-dir ./data --ai-budget 10 --ai-max-examples 2
+uv run python -m synapsea run --source ~/Downloads --data-dir ./data --ollama-model llama3.1:8b
 ```
 
 Walidacja lokalna bez aktywnego Ollama:
@@ -25,6 +26,7 @@ Tryb ciągłego monitoringu:
 
 ```bash
 uv run python -m synapsea watch --source ~/Downloads --data-dir ./data --watch-interval 2
+uv run python -m synapsea watch --source ~/Downloads --data-dir ./data --watch-interval 2 --ollama-model qwen2.5:7b
 ```
 
 Przeglad propozycji review:
@@ -32,6 +34,7 @@ Przeglad propozycji review:
 ```bash
 uv run python -m synapsea review --data-dir ./data
 uv run python -m synapsea review --data-dir ./data --verbose
+uv run python -m synapsea review --data-dir ./data --all-statuses
 ```
 
 Zatwierdzenie lub odrzucenie propozycji:
@@ -45,10 +48,13 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Domyślnie aplikacja analizuje `~/Downloads`.
 - Dane aplikacji są zapisywane w katalogu `./data`.
 - Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `gemma3:4b-it-qat`.
+- Komendy `run` i `watch` wspierają `--ollama-model`, aby wskazać model dla bieżącego uruchomienia.
 - Domyślny timeout żądania do Ollama wynosi `60` sekund.
 - Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
 - Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).
 - `watch` uruchamia pętlę monitoringu i przyjmuje `--watch-interval` (sekundy).
+- `review` domyślnie pokazuje tylko pozycje `pending`.
+- `review --all-statuses` pokazuje także pozycje `applied` i `rejected`.
 - `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie i podgląd plików.
 - Kolejka review deduplikuje semantycznie podobne propozycje (np. warianty nazwy różniące się formatowaniem), nie tylko identyczne `cluster_id`.
 - Lista review jest rankowana: najpierw `pending`, potem wyższy confidence i bogatszy kontekst (więcej plików kandydujących).
@@ -56,6 +62,9 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
 - Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).
 - `watch` startuje bez bootstrapowego przetwarzania istniejącego katalogu i reaguje na zmiany od momentu uruchomienia.
-- Komendy `apply` i `reject` aktualizują status propozycji oraz synchronizują `taxonomy.json`.
+- Komenda `apply` aktualizuje status propozycji, synchronizuje `taxonomy.json` i wykonuje przeniesienie plików `candidate_files` do docelowej sciezki kategorii.
+- Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
+- Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.
+- Skanowanie ignoruje ukryte pliki i katalogi (np. `.DS_Store`), aby ograniczyć fałszywe delty.
 - Pasywne uczenie zapisuje sygnały do `learning_signals.json`, a stan poprzedniego przebiegu do `snapshot.json`.

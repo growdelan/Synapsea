@@ -20,6 +20,8 @@
 - Warstwa Ollama korzysta ze structured outputs z walidacją przez `pydantic` zamiast opierać się na swobodnym parsowaniu tekstu.
 - Dostępne są komendy CLI `review`, `apply` i `reject`.
 - Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
+- `apply` wykonuje faktyczne przeniesienia plików `candidate_files` do docelowej ścieżki kategorii.
+- Podczas `apply` kolizje nazw są obsługiwane polityką `skip` (bez nadpisywania), a wynik zawiera liczniki `moved/skipped/errors`.
 - Pipeline zapisuje sygnały pasywnego uczenia w `learning_signals.json` i snapshoty obserwowanego drzewa plików.
 - Silnik ewolucji potrafi generować dodatkowe propozycje review dla podkategorii, merge oraz martwych kategorii.
 - Potwierdzono lokalne uruchomienie pełnego przebiegu z modelem `gemma3:4b-it-qat`.
@@ -31,9 +33,12 @@
 - Dostępna jest komenda `watch` uruchamiająca tryb ciągłego monitoringu zmian.
 - Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
+- Komendy `run` i `watch` przyjmują argument `--ollama-model` do wyboru modelu lokalnego per uruchomienie.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
+- Komenda `review` domyślnie pokazuje tylko pozycje `pending`, a `--all-statuses` pokazuje pełny przekrój statusów.
 - Review queue deduplikuje propozycje także semantycznie (parent + znormalizowana nazwa kategorii).
 - Lista review jest rankowana, aby priorytetyzować najbardziej użyteczne propozycje pending.
+- Skaner pomija ukryte pliki i katalogi (np. `.DS_Store`), aby ograniczyć fałszywe delty bez nowych danych użytkownika.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -64,6 +69,8 @@
 - Zrealizowano `Milestone 10: Rozszerzony widok review CLI`.
 - Zrealizowano `Milestone 11: Semantyczna deduplikacja propozycji review`.
 - Zrealizowano `Milestone 12: Ranking i higiena kolejki review`.
+- Zrealizowano `Milestone 13: Wykonawcze apply i bezpieczne przenoszenie plików`.
+- Zrealizowano `Milestone 14: Konfigurowalny model Ollama w CLI run/watch`.
 
 ## Co jest w trakcie
 - Wszystkie milestone’y z bieżącej roadmapy oznaczone jako `planned` zostały zrealizowane.
@@ -79,6 +86,11 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-26: zaktualizowano `review`, aby domyślnie pokazywał tylko `pending`; dodano opcję `--all-statuses`.
+- 2026-03-26: skaner został rozszerzony o ignorowanie ukrytych plików i katalogów (np. `.DS_Store`) oraz test regresyjny.
+- 2026-03-26: zrealizowano `Milestone 14`, dodając argument `--ollama-model` dla komend `run` i `watch` oraz testy regresyjne konfiguracji modelu.
+- 2026-03-26: dodano `prd/003-apply-file-moves-and-ollama-model-cli.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 13-14.
+- 2026-03-26: zrealizowano `Milestone 13`, dodając wykonawcze przenoszenie plików w `apply`, politykę kolizji `skip` i raport `moved/skipped/errors`.
 - 2026-03-26: dodano `prd/002-review-ux-and-deduplication.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 10-12.
 - 2026-03-26: zrealizowano `Milestone 10`, rozszerzając widok `review` i dodając tryb `--verbose`.
 - 2026-03-26: zrealizowano `Milestone 11`, dodając semantyczną deduplikację propozycji review.

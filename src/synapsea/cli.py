@@ -18,6 +18,12 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
     run_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
     run_parser.add_argument(
+        "--ollama-model",
+        type=str,
+        default=None,
+        help="Nazwa modelu Ollama uzywanego podczas interpretacji AI.",
+    )
+    run_parser.add_argument(
         "--ai-budget",
         type=int,
         default=None,
@@ -33,6 +39,12 @@ def build_parser() -> argparse.ArgumentParser:
     watch_parser = subparsers.add_parser("watch", help="Uruchom ciagly monitoring zmian w katalogu.")
     watch_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
     watch_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    watch_parser.add_argument(
+        "--ollama-model",
+        type=str,
+        default=None,
+        help="Nazwa modelu Ollama uzywanego podczas interpretacji AI.",
+    )
     watch_parser.add_argument(
         "--skip-ai",
         action="store_true",
@@ -69,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Pokaz rozszerzony widok review z pelnym uzasadnieniem i lista plikow.",
     )
+    review_parser.add_argument(
+        "--all-statuses",
+        action="store_true",
+        help="Pokaz wszystkie pozycje review, nie tylko pending.",
+    )
 
     apply_parser = subparsers.add_parser("apply", help="Zatwierdz propozycje review.")
     apply_parser.add_argument("item_id", help="Id propozycji review.")
@@ -87,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
         source=getattr(args, "source", None),
         data_dir=getattr(args, "data_dir", None),
         enable_ai_review=not getattr(args, "skip_ai", False),
+        ollama_model=getattr(args, "ollama_model", None),
         ai_budget_per_cycle=getattr(args, "ai_budget", None),
         ai_max_examples=getattr(args, "ai_max_examples", None),
         watch_poll_interval_seconds=getattr(args, "watch_interval", None),
@@ -99,11 +117,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "review":
         items = app.list_review_items()
+        if not getattr(args, "all_statuses", False):
+            items = [item for item in items if item.status == "pending"]
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
-        applied = app.apply_review_item(args.item_id)
-        print(f"Applied {applied.item_id} -> {applied.target_path}")
+        applied, report = app.apply_review_item(args.item_id)
+        print(
+            f"Applied {applied.item_id} -> {applied.target_path} "
+            f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
+        )
         return 0
     if args.command == "reject":
         rejected = app.reject_review_item(args.item_id)
