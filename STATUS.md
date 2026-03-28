@@ -50,6 +50,8 @@
 - Generowanie review item wylicza `final_confidence` na podstawie `base_confidence` i korekty preferencji.
 - Review item zawiera explainability (`base_confidence`, `preference_delta`, `final_confidence`, `preference_reasons`).
 - Ranking kolejki review wykorzystuje finalny confidence, zachowując priorytet statusu `pending`.
+- Dostępna jest komenda CLI `preferences` z opcjami `--verbose` i `--limit`.
+- `review --verbose` pokazuje breakdown confidence (`base/pref/final/reasons`) gdy pola są dostępne.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -86,12 +88,12 @@
 - Zrealizowano `Milestone 16: Repozytorium preferencji użytkownika`.
 - Zrealizowano `Milestone 17: Uczenie preferencji na apply/reject`.
 - Zrealizowano `Milestone 18: Scoring preferencji i explainability review`.
+- Zrealizowano `Milestone 19: CLI preferences i wgląd w confidence breakdown`.
 
 ## Co jest w trakcie
-- Trwa realizacja nowej puli milestone’ów `19-20` dla PRD 004 (uczenie preferencji użytkownika).
+- Trwa realizacja nowej puli milestone’ów `20` dla PRD 004 (uczenie preferencji użytkownika).
 
 ## Co jest następne
-- Milestone 19: nowa komenda `preferences` i rozszerzony widok breakdown w `review --verbose`.
 - Milestone 20: stabilizacja end-to-end PRD 004 i finalne domknięcie jakości.
 
 ## Blokery i ryzyka
@@ -105,6 +107,7 @@
 - 2026-03-28: zrealizowano `Milestone 16`, dodając trwałe repozytorium preferencji i testy read/write dla `user_preferences.json`.
 - 2026-03-28: zrealizowano `Milestone 17`, integrując uczenie preferencji z decyzjami `apply/reject`.
 - 2026-03-28: zrealizowano `Milestone 18`, dodając scoring preferencji i pola explainability dla review.
+- 2026-03-28: zrealizowano `Milestone 19`, dodając komendę `preferences` i breakdown confidence w `review --verbose`.
 - 2026-03-26: zaktualizowano `review`, aby domyślnie pokazywał tylko `pending`; dodano opcję `--all-statuses`.
 - 2026-03-26: skaner został rozszerzony o ignorowanie ukrytych plików i katalogów (np. `.DS_Store`) oraz test regresyjny.
 - 2026-03-26: zrealizowano `Milestone 14`, dodając argument `--ollama-model` dla komend `run` i `watch` oraz testy regresyjne konfiguracji modelu.

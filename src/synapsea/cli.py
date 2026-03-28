@@ -94,6 +94,20 @@ def build_parser() -> argparse.ArgumentParser:
     reject_parser = subparsers.add_parser("reject", help="Odrzuc propozycje review.")
     reject_parser.add_argument("item_id", help="Id propozycji review.")
     reject_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+
+    preferences_parser = subparsers.add_parser("preferences", help="Pokaz podsumowanie preferencji.")
+    preferences_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    preferences_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Pokaz dodatkowe szczegoly i liczniki sygnalow.",
+    )
+    preferences_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maksymalna liczba pozycji w sekcji podsumowania.",
+    )
     return parser
 
 
@@ -140,6 +154,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         watcher.run_forever()
         return 0
+    if args.command == "preferences":
+        lines = app.preferences_summary(
+            limit=max(1, int(getattr(args, "limit", 10))),
+            verbose=getattr(args, "verbose", False),
+        )
+        for line in lines:
+            print(line)
+        return 0
 
     parser.error(f"Nieznana komenda: {args.command}")
     return 2
@@ -156,7 +178,8 @@ def _print_review_items(items, verbose: bool = False, out: TextIO | None = None)
         )
         if verbose:
             candidate_preview = ",".join(item.candidate_files[:3])
-            line = f"{base}\t{candidate_preview}"
+            breakdown = _format_confidence_breakdown(item)
+            line = f"{base}\t{candidate_preview}\t{breakdown}"
         else:
             line = base
         if out is None:
@@ -169,3 +192,19 @@ def _truncate(text: str, max_len: int) -> str:
     if len(text) <= max_len:
         return text
     return f"{text[: max_len - 3]}..."
+
+
+def _format_confidence_breakdown(item) -> str:
+    if (
+        item.base_confidence is None
+        or item.preference_delta is None
+        or item.final_confidence is None
+    ):
+        return "base=NA pref=NA final=NA reasons=-"
+    reasons = ",".join(item.preference_reasons) if item.preference_reasons else "-"
+    return (
+        f"base={item.base_confidence:.2f} "
+        f"pref={item.preference_delta:+.2f} "
+        f"final={item.final_confidence:.2f} "
+        f"reasons={reasons}"
+    )

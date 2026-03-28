@@ -37,6 +37,13 @@ uv run python -m synapsea review --data-dir ./data --verbose
 uv run python -m synapsea review --data-dir ./data --all-statuses
 ```
 
+Inspekcja wyuczonych preferencji:
+
+```bash
+uv run python -m synapsea preferences --data-dir ./data
+uv run python -m synapsea preferences --data-dir ./data --verbose --limit 20
+```
+
 Zatwierdzenie lub odrzucenie propozycji:
 
 ```bash
@@ -55,7 +62,8 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - `watch` uruchamia pętlę monitoringu i przyjmuje `--watch-interval` (sekundy).
 - `review` domyślnie pokazuje tylko pozycje `pending`.
 - `review --all-statuses` pokazuje także pozycje `applied` i `rejected`.
-- `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie i podgląd plików.
+- `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie, podgląd plików i breakdown confidence (`base/pref/final/reasons`) gdy dane są dostępne.
+- Komenda `preferences` pokazuje top wyuczonych preferencji (pozytywnych i negatywnych) dla par propozycji oraz mapowań token/heurystyka.
 - Kolejka review deduplikuje semantycznie podobne propozycje (np. warianty nazwy różniące się formatowaniem), nie tylko identyczne `cluster_id`.
 - Lista review jest rankowana: najpierw `pending`, potem wyższy confidence i bogatszy kontekst (więcej plików kandydujących).
 - Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.

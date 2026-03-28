@@ -156,6 +156,30 @@ class UserPreferencesRepository:
             reasons=reasons,
         )
 
+    def summary_lines(self, *, limit: int = 10, verbose: bool = False) -> list[str]:
+        snapshot = self.load_snapshot()
+        lines: list[str] = []
+
+        positive_pairs = sorted(
+            snapshot.proposal_preferences.items(),
+            key=lambda entry: entry[1].score,
+            reverse=True,
+        )[:limit]
+        negative_pairs = sorted(
+            snapshot.proposal_preferences.items(),
+            key=lambda entry: entry[1].score,
+        )[:limit]
+        lines.append("Top pozytywne pary propozycji:")
+        lines.extend(self._format_pairs(positive_pairs, verbose=verbose))
+        lines.append("Top negatywne pary propozycji:")
+        lines.extend(self._format_pairs(negative_pairs, verbose=verbose))
+
+        lines.append("Top preferencje tokenow:")
+        lines.extend(self._format_nested(snapshot.token_preferences, limit=limit, verbose=verbose))
+        lines.append("Top preferencje heurystyk:")
+        lines.extend(self._format_nested(snapshot.heuristic_preferences, limit=limit, verbose=verbose))
+        return lines
+
     def _record_nested(self, group: str, signal: str, category_key: str, *, accepted: bool) -> None:
         payload = self._read()
         root = payload.setdefault(group, {})
@@ -202,6 +226,51 @@ class UserPreferencesRepository:
         if not scores:
             return 0.0
         return sum(scores) / len(scores)
+
+    def _format_pairs(
+        self,
+        items: list[tuple[str, PreferenceStats]],
+        *,
+        verbose: bool,
+    ) -> list[str]:
+        if not items:
+            return ["- brak danych"]
+        lines: list[str] = []
+        for key, stats in items:
+            if verbose:
+                lines.append(
+                    f"- {key}: score={stats.score:+.3f}, "
+                    f"accept={stats.accept_count}, reject={stats.reject_count}"
+                )
+            else:
+                lines.append(f"- {key}: {stats.score:+.3f}")
+        return lines
+
+    def _format_nested(
+        self,
+        source: dict[str, dict[str, PreferenceStats]],
+        *,
+        limit: int,
+        verbose: bool,
+    ) -> list[str]:
+        flattened: list[tuple[str, str, PreferenceStats]] = []
+        for signal, categories in source.items():
+            for category_key, stats in categories.items():
+                flattened.append((signal, category_key, stats))
+        flattened.sort(key=lambda entry: entry[2].score, reverse=True)
+        flattened = flattened[:limit]
+        if not flattened:
+            return ["- brak danych"]
+        lines: list[str] = []
+        for signal, category_key, stats in flattened:
+            if verbose:
+                lines.append(
+                    f"- {signal} -> {category_key}: score={stats.score:+.3f}, "
+                    f"accept={stats.accept_count}, reject={stats.reject_count}"
+                )
+            else:
+                lines.append(f"- {signal} -> {category_key}: {stats.score:+.3f}")
+        return lines
 
     def _read(self) -> dict[str, Any]:
         return json.loads(self.path.read_text(encoding="utf-8"))

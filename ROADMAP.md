@@ -408,7 +408,7 @@ Zakres:
 
 ---
 
-## Milestone 19: CLI preferences i wgląd w confidence breakdown (planned)
+## Milestone 19: CLI preferences i wgląd w confidence breakdown (done)
 
 Cel:
 - udostępnić użytkownikowi czytelną komendę inspekcji wyuczonych preferencji

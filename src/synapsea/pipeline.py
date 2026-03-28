@@ -319,6 +319,11 @@ class SynapseaApp:
             return []
         return self.review_queue.list_items()
 
+    def preferences_summary(self, *, limit: int = 10, verbose: bool = False) -> list[str]:
+        if self.user_preferences is None:
+            return ["Brak skonfigurowanego magazynu preferencji."]
+        return self.user_preferences.summary_lines(limit=limit, verbose=verbose)
+
     def apply_review_item(self, item_id: str) -> tuple[ReviewItem, ApplyMoveReport]:
         if self.review_queue is None or self.taxonomy is None:
             raise RuntimeError("Brak skonfigurowanej review queue lub taksonomii.")
