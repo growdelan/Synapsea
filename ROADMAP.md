@@ -351,7 +351,7 @@ Zakres:
 
 ---
 
-## Milestone 16: Repozytorium preferencji użytkownika (planned)
+## Milestone 16: Repozytorium preferencji użytkownika (done)
 
 Cel:
 - dostarczyć trwały, lokalny magazyn preferencji użytkownika zgodny z PRD 004
