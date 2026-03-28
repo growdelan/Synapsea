@@ -466,7 +466,7 @@ Zakres:
 
 ---
 
-## Milestone 22: Dashboard i run now (planned)
+## Milestone 22: Dashboard i run now (done)
 
 Cel:
 - udostępnić ekran startowy dashboardu z podstawowym stanem systemu

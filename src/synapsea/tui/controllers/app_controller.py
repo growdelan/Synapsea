@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 from synapsea.config import AppConfig
 from synapsea.pipeline import SynapseaApp
@@ -49,3 +50,15 @@ class AppController:
             last_operation_status=self.last_operation_status,
             last_operation_message=self.last_operation_message,
         )
+
+    def run_now(self) -> DashboardSnapshot:
+        try:
+            processed = self.app.run_once()
+        except Exception as exc:
+            self.last_operation_status = "error"
+            self.last_operation_message = f"Run zakonczony bledem: {exc}"
+        else:
+            self.last_run_at = datetime.now().isoformat(timespec="seconds")
+            self.last_operation_status = "success"
+            self.last_operation_message = f"Processed {processed} file(s)."
+        return self.get_dashboard_snapshot()

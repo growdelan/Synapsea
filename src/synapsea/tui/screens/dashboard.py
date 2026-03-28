@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from textual.containers import Container
+from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, Header, Static
+from textual.widgets import Button, Footer, Header, Static
 
 from synapsea.tui.controllers.app_controller import DashboardSnapshot
 
 
 class DashboardScreen(Screen[None]):
     BINDINGS = [
+        ("r", "run_now", "Run now"),
         ("q", "app.quit", "Wyjscie"),
     ]
 
@@ -21,7 +22,23 @@ class DashboardScreen(Screen[None]):
         with Container(id="dashboard-container"):
             yield Static("Synapsea TUI", id="dashboard-title")
             yield Static(self._build_summary(), id="dashboard-summary")
+            with Horizontal(id="dashboard-actions"):
+                yield Button("Run now", id="run-now", variant="primary")
+                yield Button("Wyjscie", id="quit-app")
         yield Footer()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "run-now":
+            self.action_run_now()
+        if event.button.id == "quit-app":
+            self.app.exit()
+
+    def action_run_now(self) -> None:
+        self.app.action_run_now()
+
+    def update_snapshot(self, snapshot: DashboardSnapshot) -> None:
+        self.snapshot = snapshot
+        self.query_one("#dashboard-summary", Static).update(self._build_summary())
 
     def _build_summary(self) -> str:
         ai_state = "wlaczone" if self.snapshot.ai_enabled else "wylaczone"

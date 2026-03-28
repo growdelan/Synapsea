@@ -25,6 +25,7 @@ class SynapseaTuiApp(App[None]):
 
     BINDINGS = [
         ("d", "show_dashboard", "Dashboard"),
+        ("r", "run_now", "Run now"),
         ("q", "quit", "Wyjscie"),
     ]
 
@@ -44,3 +45,9 @@ class SynapseaTuiApp(App[None]):
 
     def action_show_dashboard(self) -> None:
         self.switch_screen(DashboardScreen(self.controller.get_dashboard_snapshot()))
+
+    def action_run_now(self) -> None:
+        snapshot = self.controller.run_now()
+        current_screen = self.screen
+        if isinstance(current_screen, DashboardScreen):
+            current_screen.update_snapshot(snapshot)
