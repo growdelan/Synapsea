@@ -7,6 +7,7 @@ import shutil
 from typing import Callable, Iterable
 
 from synapsea.ai_state import AiProposalCacheRepository, DeferredClusterRepository
+from synapsea.bootstrap_segregator import BootstrapSegregationReport, BootstrapSegregator
 from synapsea.candidate_clusters import CandidateClusterRepository
 from synapsea.classifier import FileClassifier
 from synapsea.cluster_engine import ClusterEngine
@@ -76,6 +77,7 @@ class SynapseaApp:
         ai_budget_per_cycle: int = 20,
         proposal_interpreter: OllamaClient | None = None,
         iter_files: FileIterator | None = None,
+        bootstrap_segregator: BootstrapSegregator | None = None,
     ) -> None:
         self.source_dir = source_dir
         self.decision_log = decision_log
@@ -96,6 +98,7 @@ class SynapseaApp:
         self.proposal_interpreter = proposal_interpreter
         self.iter_files = iter_files or self._iter_source_files
         self.user_preferences = user_preferences
+        self.bootstrap_segregator = bootstrap_segregator or BootstrapSegregator(source_dir)
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "SynapseaApp":
@@ -160,6 +163,9 @@ class SynapseaApp:
         if self.input_state_repository is not None:
             self.input_state_repository.save(current_state)
         return processed
+
+    def bootstrap_segregate_root_files(self) -> BootstrapSegregationReport:
+        return self.bootstrap_segregator.segregate_root_files()
 
     def refresh_candidate_clusters(
         self,

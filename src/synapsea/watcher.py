@@ -19,14 +19,18 @@ class WatchService:
             sleep(self.poll_interval_seconds)
 
     def poll_once(self) -> int:
-        current = self._scan_snapshot()
         if self._snapshot is None:
-            # Start bez bootstrapowego przetwarzania: watcher przechodzi w tryb nasłuchu od teraz.
+            bootstrap = getattr(self.app, "bootstrap_segregate_root_files", None)
+            if callable(bootstrap):
+                bootstrap()
+            current = self._scan_snapshot()
             self._snapshot = current
             if self.app.input_state_repository is not None:
                 paths = self.app._collect_current_paths()
                 self.app.input_state_repository.save(self.app._build_input_state(paths))
             return 0
+
+        current = self._scan_snapshot()
 
         if current == self._snapshot:
             return 0

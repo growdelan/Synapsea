@@ -126,6 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     app = SynapseaApp.from_config(config)
 
     if args.command == "run":
+        app.bootstrap_segregate_root_files()
         processed = app.run_once()
         print(f"Processed {processed} file(s).")
         return 0

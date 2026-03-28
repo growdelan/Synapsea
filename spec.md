@@ -24,7 +24,7 @@ Opis funkcjonalności na wysokim poziomie:
   - warstwa AI interpretuje klastry i zapisuje propozycje do kolejki review,
   - użytkownik przegląda, akceptuje lub odrzuca propozycje przez CLI,
   - zatwierdzenie propozycji przez `apply` może uruchomić faktyczne przeniesienia plików kandydujących do docelowej ścieżki kategorii.
-- Aplikacja **nie** wykonuje automatycznych zmian w strukturze plików bez decyzji użytkownika.
+- Aplikacja **nie** wykonuje automatycznych zmian w strukturze plików bez decyzji użytkownika, z trwałym wyjątkiem dla etapu bootstrapowej segregacji plików luzem z root aktywnego katalogu źródłowego (domyślnie `~/Downloads`) opisanego w PRD 006.
 - Aplikacja **nie** dostarcza interfejsu graficznego w MVP.
 - Aplikacja **nie** wysyła danych poza lokalną maszynę.
 - W MVP domyślnym katalogiem monitorowanym jest `~/Downloads`.
@@ -34,6 +34,7 @@ Opis funkcjonalności na wysokim poziomie:
 - W kolejnym przyroście (PRD 003) `apply` może wykonywać przeniesienia plików po akceptacji review, a komendy `run/watch` przyjmują argument wyboru modelu `--ollama-model`.
 - W kolejnym przyroście (PRD 004) system uczy się preferencji użytkownika na podstawie decyzji `apply/reject` i używa ich do korekty rankingu propozycji review.
 - W kolejnym przyroście (PRD 005) komendy `apply/reject` wspierają batchową obsługę wielu ID w jednym wywołaniu CLI wraz z raportem zbiorczym.
+- W kolejnym przyroście (PRD 006) komendy `run/watch` rozpoczynają działanie od segregacji plików luzem z root aktywnego katalogu źródłowego (domyślnie `~/Downloads`) do standardowych katalogów, a dopiero potem uruchamiają klastrowanie i AI.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -50,6 +51,7 @@ Opis architektury na poziomie koncepcyjnym.
    - warstwa review i zarządzania taksonomią odpowiedzialna za zapis propozycji i obsługę decyzji użytkownika,
    - interfejs CLI do uruchamiania procesu i obsługi review.
 2. Przepływ danych między komponentami
+   - przy starcie `run/watch` (PRD 006) system wykonuje bootstrapową segregację plików luzem z root aktywnego katalogu źródłowego do katalogów standardowych przed dalszą analizą,
    - pliki z folderu wejściowego trafiają do skanera,
    - skaner przekazuje dane do ekstrakcji cech i klasyfikacji,
    - wyniki klasyfikacji są logowane i przekazywane do silnika wzorców,
@@ -60,6 +62,7 @@ Opis architektury na poziomie koncepcyjnym.
    - w przyroście inkrementalnym po MVP (PRD 001) system dodatkowo utrzymuje stan wejścia, wylicza deltę zmian i ogranicza przetwarzanie do plików oraz klastrów dotkniętych zmianą.
    - w przyroście PRD 002 system dodatkowo normalizuje propozycje review i ogranicza duplikaty semantyczne, zachowując zgodność komend `apply/reject`.
    - w przyroście PRD 005 komendy `apply/reject` mogą przetwarzać sekwencyjnie wiele pozycji review i zwracać raport agregowany sukcesów/błędów.
+   - w przyroście PRD 006 etap bootstrapowej segregacji działa tylko dla plików bezpośrednio w aktywnym katalogu źródłowym (bez rekurencyjnego przemieszczania podkatalogów), używa fallbacku `Inne` i polityki kolizji `skip + raport`.
 3. Granice odpowiedzialności
    - komponenty heurystyczne odpowiadają za wykrywanie wzorców i przygotowanie danych wejściowych dla AI,
    - komponent AI odpowiada wyłącznie za interpretację kandydatów i rekomendacje,
@@ -112,6 +115,9 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - trwałe utrzymywanie lokalnych preferencji użytkownika i statystyk akceptacji/odrzuceń w `user_preferences.json`.
 - `preference_scorer` (dotyczy PRD: 004-user-preference-learning-pl.md):
   - wyliczanie korekty `confidence` na podstawie preferencji oraz budowanie strukturalnego explainability dla review item.
+- `bootstrap_downloads_segregator` (dotyczy PRD: 006-auto-downloads-bootstrap-segregation.md):
+  - segregacja plików luzem z root aktywnego katalogu źródłowego do katalogów `Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne` przed klastrowaniem i AI.
+  - raportowanie wyniku etapu (`requested/moved/skipped/errors`) oraz obsługa kolizji polityką `skip + raport`.
 
 ---
 
@@ -242,6 +248,20 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - CLI musi raportować wynik zbiorczy i zwracać kod zakończenia `!= 0` przy częściowej porażce.
 
+- Decyzja:
+  - PRD 006 dodaje bootstrapową segregację plików luzem z root aktywnego katalogu źródłowego jako etap startowy `run/watch`, wykonywany przed klastrowaniem i AI (dotyczy PRD: 006-auto-downloads-bootstrap-segregation.md).
+  Uzasadnienie:
+  - Celem jest zmniejszenie szumu wejściowego i uporządkowanie danych przed etapami heurystycznymi i AI.
+  Konsekwencje:
+  - Pipeline `run/watch` zyskuje nową fazę wykonawczą na systemie plików oraz raport jej wyniku.
+
+- Decyzja:
+  - Występuje konflikt pomiędzy zasadą „Aplikacja **nie** wykonuje automatycznych zmian w strukturze plików bez decyzji użytkownika.” a automatycznym etapem segregacji PRD 006 (dotyczy PRD: 006-auto-downloads-bootstrap-segregation.md).
+  Uzasadnienie:
+  - PRD 006 zakłada automatyczne przeniesienia plików już na starcie `run/watch`, bez kroku review/apply.
+  Konsekwencje:
+  - Bootstrapowa segregacja aktywnego katalogu źródłowego jest trwałym wyjątkiem od zasady human-in-the-loop i nie wymaga dodatkowego mechanizmu zgody przed uruchomieniem.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -279,4 +299,4 @@ Wspólne wymagania jakościowe dla całego projektu.
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
 - Ostatnia aktualizacja: 2026-03-28
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`, przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md` oraz przyrost batchowego `apply/reject` opisany w `prd/005-batch-apply-reject-cli.md`
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`, przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md`, przyrost batchowego `apply/reject` opisany w `prd/005-batch-apply-reject-cli.md` oraz przyrost bootstrapowej segregacji `~/Downloads` opisany w `prd/006-auto-downloads-bootstrap-segregation.md`
