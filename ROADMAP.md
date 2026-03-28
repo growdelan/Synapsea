@@ -370,7 +370,7 @@ Zakres:
 
 ---
 
-## Milestone 17: Uczenie preferencji na apply/reject (planned)
+## Milestone 17: Uczenie preferencji na apply/reject (done)
 
 Cel:
 - zintegrować uczenie preferencji z decyzjami użytkownika w komendach `apply` i `reject`

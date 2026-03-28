@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 import shutil
 from typing import Callable, Iterable
 
@@ -28,6 +29,7 @@ from synapsea.review_queue import ReviewQueueRepository
 from synapsea.scanner import FileScanner
 from synapsea.storage import DecisionLogRepository
 from synapsea.taxonomy import TaxonomyRepository
+from synapsea.user_preferences import UserPreferencesRepository
 
 
 FileIterator = Callable[[], Iterable[Path]]
@@ -58,6 +60,7 @@ class SynapseaApp:
         input_state_repository: InputStateRepository | None = None,
         ai_proposal_cache: AiProposalCacheRepository | None = None,
         deferred_clusters: DeferredClusterRepository | None = None,
+        user_preferences: UserPreferencesRepository | None = None,
         ai_budget_per_cycle: int = 20,
         proposal_interpreter: OllamaClient | None = None,
         iter_files: FileIterator | None = None,
@@ -80,6 +83,7 @@ class SynapseaApp:
         self.evolution_engine = evolution_engine or EvolutionEngine()
         self.proposal_interpreter = proposal_interpreter
         self.iter_files = iter_files or self._iter_source_files
+        self.user_preferences = user_preferences
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "SynapseaApp":
@@ -92,6 +96,7 @@ class SynapseaApp:
         input_state_repository = InputStateRepository(config.data_dir / "input_state.json")
         ai_proposal_cache = AiProposalCacheRepository(config.data_dir / "ai_proposal_cache.json")
         deferred_clusters = DeferredClusterRepository(config.data_dir / "deferred_clusters.json")
+        user_preferences = UserPreferencesRepository(config.data_dir / "user_preferences.json")
         proposal_interpreter = None
         if config.enable_ai_review:
             proposal_interpreter = OllamaClient(
@@ -113,6 +118,7 @@ class SynapseaApp:
             input_state_repository=input_state_repository,
             ai_proposal_cache=ai_proposal_cache,
             deferred_clusters=deferred_clusters,
+            user_preferences=user_preferences,
             ai_budget_per_cycle=config.ai_budget_per_cycle,
             proposal_interpreter=proposal_interpreter,
         )
@@ -303,6 +309,7 @@ class SynapseaApp:
             file_path=item.target_path,
             details={"proposed_category": item.proposed_category},
         )
+        self._learn_from_review_decision(item, accepted=True)
         move_report = self._move_candidate_files(item)
         return item, move_report
 
@@ -340,7 +347,48 @@ class SynapseaApp:
             file_path=item.target_path,
             details={"proposed_category": item.proposed_category},
         )
+        self._learn_from_review_decision(item, accepted=False)
         return item
+
+    def _learn_from_review_decision(self, item: ReviewItem, *, accepted: bool) -> None:
+        if self.user_preferences is None:
+            return
+
+        pair_key = f"{item.parent_category}::{item.proposed_category}"
+        self.user_preferences.record_proposal_pair(pair_key, accepted=accepted)
+        if not accepted:
+            return
+
+        category_key = item.target_path
+        tokens, heuristic_classes, pattern_keys = self._collect_item_signals(item)
+        for token in tokens:
+            self.user_preferences.record_token(token, category_key, accepted=True)
+        for heuristic in heuristic_classes:
+            self.user_preferences.record_heuristic(heuristic, category_key, accepted=True)
+        for pattern in pattern_keys:
+            self.user_preferences.record_pattern(pattern, category_key, accepted=True)
+
+    def _collect_item_signals(self, item: ReviewItem) -> tuple[set[str], set[str], set[str]]:
+        decision_by_path = {decision.file_path: decision for decision in self.decision_log.list_all()}
+        tokens: set[str] = set()
+        heuristics: set[str] = set()
+        patterns: set[str] = set()
+
+        for path in item.candidate_files:
+            decision = decision_by_path.get(path)
+            if decision is None:
+                continue
+            tokens.update(token for token in decision.tokens if len(token) >= 3)
+            heuristics.update(decision.heuristic_classes)
+            patterns.update(key for key, value in decision.pattern_signals.items() if value > 0.0)
+
+        if not tokens:
+            fallback_tokens = re.findall(r"[a-z0-9]+", item.proposed_category.lower())
+            tokens.update(token for token in fallback_tokens if len(token) >= 3)
+
+        if not heuristics and item.cluster_id:
+            heuristics.add(f"cluster:{item.cluster_id}")
+        return tokens, heuristics, patterns
 
     def _capture_passive_learning(self, current_paths: list[Path] | None = None) -> None:
         if self.snapshot_repository is None:
