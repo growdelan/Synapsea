@@ -88,11 +88,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     apply_parser = subparsers.add_parser("apply", help="Zatwierdz propozycje review.")
-    apply_parser.add_argument("item_id", help="Id propozycji review.")
+    apply_parser.add_argument("item_ids", nargs="+", help="Id propozycji review.")
     apply_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
 
     reject_parser = subparsers.add_parser("reject", help="Odrzuc propozycje review.")
-    reject_parser.add_argument("item_id", help="Id propozycji review.")
+    reject_parser.add_argument("item_ids", nargs="+", help="Id propozycji review.")
     reject_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
 
     preferences_parser = subparsers.add_parser("preferences", help="Pokaz podsumowanie preferencji.")
@@ -136,16 +136,20 @@ def main(argv: list[str] | None = None) -> int:
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
-        applied, report = app.apply_review_item(args.item_id)
+        report = app.apply_review_items(args.item_ids)
+        for failure in report.failures or []:
+            print(f"Apply failed {failure}")
         print(
-            f"Applied {applied.item_id} -> {applied.target_path} "
-            f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
+            f"Batch apply requested={report.requested} succeeded={report.succeeded} failed={report.failed} "
+            f"moved={report.moved} skipped={report.skipped} errors={report.errors}"
         )
-        return 0
+        return 0 if report.failed == 0 else 1
     if args.command == "reject":
-        rejected = app.reject_review_item(args.item_id)
-        print(f"Rejected {rejected.item_id}")
-        return 0
+        report = app.reject_review_items(args.item_ids)
+        for failure in report.failures or []:
+            print(f"Reject failed {failure}")
+        print(f"Batch reject requested={report.requested} succeeded={report.succeeded} failed={report.failed}")
+        return 0 if report.failed == 0 else 1
     if args.command == "watch":
         watcher = WatchService(
             app=app,

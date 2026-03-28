@@ -49,6 +49,8 @@ Zatwierdzenie lub odrzucenie propozycji:
 ```bash
 uv run python -m synapsea apply rev_001 --data-dir ./data
 uv run python -m synapsea reject rev_002 --data-dir ./data
+uv run python -m synapsea apply rev_001 rev_002 rev_003 --data-dir ./data
+uv run python -m synapsea reject rev_010 rev_011 rev_012 --data-dir ./data
 ```
 
 ## Konfiguracja
@@ -73,6 +75,9 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Komenda `apply` aktualizuje status propozycji, synchronizuje `taxonomy.json` i wykonuje przeniesienie plików `candidate_files` do docelowej sciezki kategorii.
 - Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
 - Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
+- Komendy `apply` i `reject` przyjmuja jedno lub wiele ID w pojedynczym wywolaniu.
+- Batch `apply/reject` raportuje `requested`, `succeeded`, `failed`; dodatkowo `apply` agreguje `moved`, `skipped`, `errors`.
+- Batch `apply/reject` konczy sie kodem `0` gdy wszystkie ID sie powiodly lub `1` gdy wystapil co najmniej jeden blad.
 - Skanowanie działa rekurencyjnie w monitorowanym katalogu.
 - Skanowanie ignoruje ukryte pliki i katalogi (np. `.DS_Store`), aby ograniczyć fałszywe delty.
 - Pasywne uczenie zapisuje sygnały do `learning_signals.json`, a stan poprzedniego przebiegu do `snapshot.json`.
