@@ -427,7 +427,7 @@ Zakres:
 
 ---
 
-## Milestone 20: Stabilizacja end-to-end PRD 004 (planned)
+## Milestone 20: Stabilizacja end-to-end PRD 004 (done)
 
 Cel:
 - domknąć jakość i spójność funkcji uczenia preferencji w pełnym przepływie produktu
