@@ -486,7 +486,7 @@ Zakres:
 
 ---
 
-## Milestone 23: Review screen, focus i multi-select (planned)
+## Milestone 23: Review screen, focus i multi-select (done)
 
 Cel:
 - zbudować główny ekran review do codziennej pracy na kolejce propozycji

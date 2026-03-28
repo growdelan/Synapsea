@@ -9,6 +9,7 @@ from synapsea.tui.controllers.app_controller import DashboardSnapshot
 
 class DashboardScreen(Screen[None]):
     BINDINGS = [
+        ("w", "show_review", "Review"),
         ("r", "run_now", "Run now"),
         ("q", "app.quit", "Wyjscie"),
     ]
@@ -23,11 +24,14 @@ class DashboardScreen(Screen[None]):
             yield Static("Synapsea TUI", id="dashboard-title")
             yield Static(self._build_summary(), id="dashboard-summary")
             with Horizontal(id="dashboard-actions"):
+                yield Button("Review", id="show-review")
                 yield Button("Run now", id="run-now", variant="primary")
                 yield Button("Wyjscie", id="quit-app")
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "show-review":
+            self.action_show_review()
         if event.button.id == "run-now":
             self.action_run_now()
         if event.button.id == "quit-app":
@@ -35,6 +39,9 @@ class DashboardScreen(Screen[None]):
 
     def action_run_now(self) -> None:
         self.app.action_run_now()
+
+    def action_show_review(self) -> None:
+        self.app.action_show_review()
 
     def update_snapshot(self, snapshot: DashboardSnapshot) -> None:
         self.snapshot = snapshot

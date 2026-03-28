@@ -21,6 +21,19 @@ class DashboardSnapshot:
     last_operation_message: str
 
 
+@dataclass(slots=True)
+class ReviewItemSnapshot:
+    item_id: str
+    status: str
+    parent_category: str
+    proposed_category: str
+    confidence: float
+    candidate_count: int
+    target_path: str
+    reason: str
+    candidate_files: list[str]
+
+
 class AppController:
     def __init__(self, config: AppConfig, app: SynapseaApp) -> None:
         self.config = config
@@ -62,3 +75,22 @@ class AppController:
             self.last_operation_status = "success"
             self.last_operation_message = f"Processed {processed} file(s)."
         return self.get_dashboard_snapshot()
+
+    def get_review_items(self, *, show_all_statuses: bool = False) -> list[ReviewItemSnapshot]:
+        items = self.app.list_review_items()
+        if not show_all_statuses:
+            items = [item for item in items if item.status == "pending"]
+        return [
+            ReviewItemSnapshot(
+                item_id=item.item_id,
+                status=item.status,
+                parent_category=item.parent_category,
+                proposed_category=item.proposed_category,
+                confidence=item.confidence,
+                candidate_count=len(item.candidate_files),
+                target_path=item.target_path,
+                reason=item.reason,
+                candidate_files=list(item.candidate_files),
+            )
+            for item in items
+        ]

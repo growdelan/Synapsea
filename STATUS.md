@@ -59,6 +59,8 @@
 - Istnieje cienki `AppController` dla TUI, który korzysta bezpośrednio z `SynapseaApp` i buduje snapshot dashboardu bez subprocessów.
 - Dashboard TUI pokazuje podstawową konfigurację, liczniki review per status oraz stan ostatniej operacji.
 - Z poziomu dashboardu TUI działa akcja `run now`, która uruchamia pipeline bezpośrednio przez backend i odświeża widok po zakończeniu.
+- TUI udostępnia ekran review z listą pozycji, panelem szczegółów i skrótami klawiaturowymi dla podstawowej nawigacji.
+- Stan zaznaczenia batch jest rozdzielony od focusa, a zmiana filtra usuwa zaznaczenia ukrytych pozycji.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -99,12 +101,12 @@
 - Zrealizowano `Milestone 20: Stabilizacja end-to-end PRD 004`.
 - Zrealizowano `Milestone 21: Fundament TUI i redukcja ryzyka`.
 - Zrealizowano `Milestone 22: Dashboard i run now`.
+- Zrealizowano `Milestone 23: Review screen, focus i multi-select`.
 
 ## Co jest w trakcie
-- Następnym milestone’em do realizacji jest `Milestone 23: Review screen, focus i multi-select`.
+- Następnym milestone’em do realizacji jest `Milestone 24: Batch apply/reject i odporność operacyjna`.
 
 ## Co jest następne
-- Realizacja `Milestone 23: Review screen, focus i multi-select`.
 - Realizacja `Milestone 24: Batch apply/reject i odporność operacyjna`.
 - Realizacja `Milestone 25: Ergonomia etapu 2 TUI`.
 
@@ -114,6 +116,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: zrealizowano `Milestone 23`, dodając ekran review TUI z multi-select, panelem szczegółów i filtrem statusów.
 - 2026-03-28: zrealizowano `Milestone 22`, dodając dashboard TUI z akcją `run now`, raportem wyniku i automatycznym odświeżaniem.
 - 2026-03-28: dodano `prd/005-textual-tui-workstation-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 21-25.
 - 2026-03-28: zrealizowano `Milestone 21`, dodając zależność `textual`, komendę `tui`, minimalny dashboard startowy i testy fundamentu TUI.
