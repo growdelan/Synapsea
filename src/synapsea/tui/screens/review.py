@@ -12,6 +12,8 @@ class ReviewScreen(Screen[None]):
         ("space", "toggle_current", "Zaznacz"),
         ("x", "select_all_visible", "Zaznacz wszystkie"),
         ("u", "clear_selection", "Wyczysc zaznaczenie"),
+        ("a", "apply_selected", "Apply"),
+        ("r", "reject_selected", "Reject"),
         ("p", "show_pending", "Pending"),
         ("A", "show_all", "Wszystkie"),
         ("d,escape", "show_dashboard", "Dashboard"),
@@ -79,6 +81,15 @@ class ReviewScreen(Screen[None]):
 
     def action_show_dashboard(self) -> None:
         self.app.action_show_dashboard()
+
+    def action_apply_selected(self) -> None:
+        self.app.action_apply_selected()
+
+    def action_reject_selected(self) -> None:
+        self.app.action_reject_selected()
+
+    def get_selected_ids(self) -> list[str]:
+        return [item.item_id for item in self.items if item.item_id in self.selected_ids]
 
     def on_selection_list_selection_highlighted(self, message: SelectionList.SelectionHighlighted) -> None:
         self._update_detail(message.selection_index)

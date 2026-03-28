@@ -61,6 +61,8 @@
 - Z poziomu dashboardu TUI działa akcja `run now`, która uruchamia pipeline bezpośrednio przez backend i odświeża widok po zakończeniu.
 - TUI udostępnia ekran review z listą pozycji, panelem szczegółów i skrótami klawiaturowymi dla podstawowej nawigacji.
 - Stan zaznaczenia batch jest rozdzielony od focusa, a zmiana filtra usuwa zaznaczenia ukrytych pozycji.
+- Batch `apply` i `reject` w TUI działają sekwencyjnie, pokazują modal potwierdzenia i raport zbiorczy.
+- Błąd pojedynczego elementu w batch `apply/reject` nie zatrzymuje całej operacji, a dashboard i review odświeżają się po akcji.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -102,12 +104,12 @@
 - Zrealizowano `Milestone 21: Fundament TUI i redukcja ryzyka`.
 - Zrealizowano `Milestone 22: Dashboard i run now`.
 - Zrealizowano `Milestone 23: Review screen, focus i multi-select`.
+- Zrealizowano `Milestone 24: Batch apply/reject i odporność operacyjna`.
 
 ## Co jest w trakcie
-- Następnym milestone’em do realizacji jest `Milestone 24: Batch apply/reject i odporność operacyjna`.
+- Następnym milestone’em do realizacji jest `Milestone 25: Ergonomia etapu 2 TUI`.
 
 ## Co jest następne
-- Realizacja `Milestone 24: Batch apply/reject i odporność operacyjna`.
 - Realizacja `Milestone 25: Ergonomia etapu 2 TUI`.
 
 ## Blokery i ryzyka
@@ -116,6 +118,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: zrealizowano `Milestone 24`, dodając batch `apply/reject` w TUI z modalami potwierdzeń, raportami i odpornością na błędy częściowe.
 - 2026-03-28: zrealizowano `Milestone 23`, dodając ekran review TUI z multi-select, panelem szczegółów i filtrem statusów.
 - 2026-03-28: zrealizowano `Milestone 22`, dodając dashboard TUI z akcją `run now`, raportem wyniku i automatycznym odświeżaniem.
 - 2026-03-28: dodano `prd/005-textual-tui-workstation-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 21-25.

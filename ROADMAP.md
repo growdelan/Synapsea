@@ -506,7 +506,7 @@ Zakres:
 
 ---
 
-## Milestone 24: Batch apply/reject i odporność operacyjna (planned)
+## Milestone 24: Batch apply/reject i odporność operacyjna (done)
 
 Cel:
 - domknąć TUI o sekwencyjne operacje batch dla review queue

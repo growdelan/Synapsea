@@ -34,6 +34,38 @@ class ReviewItemSnapshot:
     candidate_files: list[str]
 
 
+@dataclass(slots=True)
+class BatchActionReport:
+    action_name: str
+    requested_count: int
+    succeeded_count: int
+    failed_count: int
+    moved: int = 0
+    skipped: int = 0
+    errors: int = 0
+    failures: list[str] | None = None
+
+    def summary_lines(self) -> list[str]:
+        lines = [
+            f"Akcja: {self.action_name}",
+            f"Wybranych pozycji: {self.requested_count}",
+            f"Zakonczonych sukcesem: {self.succeeded_count}",
+            f"Nieudanych pozycji: {self.failed_count}",
+        ]
+        if self.action_name == "apply":
+            lines.extend(
+                [
+                    f"Moved: {self.moved}",
+                    f"Skipped: {self.skipped}",
+                    f"Errors: {self.errors}",
+                ]
+            )
+        if self.failures:
+            lines.append("Bledy:")
+            lines.extend(self.failures)
+        return lines
+
+
 class AppController:
     def __init__(self, config: AppConfig, app: SynapseaApp) -> None:
         self.config = config
@@ -94,3 +126,51 @@ class AppController:
             )
             for item in items
         ]
+
+    def apply_selected(self, item_ids: list[str]) -> BatchActionReport:
+        report = BatchActionReport(
+            action_name="apply",
+            requested_count=len(item_ids),
+            succeeded_count=0,
+            failed_count=0,
+            failures=[],
+        )
+        for item_id in item_ids:
+            try:
+                _item, move_report = self.app.apply_review_item(item_id)
+            except Exception as exc:
+                report.failed_count += 1
+                report.failures.append(f"{item_id}: {exc}")
+                continue
+            report.succeeded_count += 1
+            report.moved += move_report.moved
+            report.skipped += move_report.skipped
+            report.errors += move_report.errors
+        self.last_operation_status = "success" if report.failed_count == 0 else "partial"
+        self.last_operation_message = (
+            f"Batch apply: ok={report.succeeded_count}, failed={report.failed_count}, "
+            f"moved={report.moved}, skipped={report.skipped}, errors={report.errors}"
+        )
+        return report
+
+    def reject_selected(self, item_ids: list[str]) -> BatchActionReport:
+        report = BatchActionReport(
+            action_name="reject",
+            requested_count=len(item_ids),
+            succeeded_count=0,
+            failed_count=0,
+            failures=[],
+        )
+        for item_id in item_ids:
+            try:
+                self.app.reject_review_item(item_id)
+            except Exception as exc:
+                report.failed_count += 1
+                report.failures.append(f"{item_id}: {exc}")
+                continue
+            report.succeeded_count += 1
+        self.last_operation_status = "success" if report.failed_count == 0 else "partial"
+        self.last_operation_message = (
+            f"Batch reject: ok={report.succeeded_count}, failed={report.failed_count}"
+        )
+        return report
