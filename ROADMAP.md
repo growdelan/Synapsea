@@ -503,7 +503,7 @@ Zakres:
 
 ---
 
-## Milestone 24: Raportowanie, kolizje i walidacja segregacji bootstrapowej (planned)
+## Milestone 24: Raportowanie, kolizje i walidacja segregacji bootstrapowej (done)
 
 Cel:
 - domknąć bezpieczeństwo wykonawcze segregacji przez politykę kolizji i czytelny raport operacyjny

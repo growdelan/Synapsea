@@ -71,8 +71,11 @@ uv run python -m synapsea reject rev_010 rev_011 rev_012 --data-dir ./data
 - Po uruchomieniu z aktywną warstwą AI pipeline zapisuje kandydatów klastrów do `candidate_clusters.json` oraz propozycje do `review_queue.json`.
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
 - `run` przed analizą uruchamia bootstrapową segregację plików luzem z root aktywnego `--source` do katalogów `Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne`.
+- `run` wypisuje raport bootstrapu: `requested`, `moved`, `skipped`, `errors`.
 - Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).
 - `watch` na pierwszym cyklu uruchamia ten sam etap bootstrapowej segregacji i dopiero potem przechodzi w tryb nasłuchu zmian.
+- `watch` na starcie wypisuje ten sam raport bootstrapu (`requested`, `moved`, `skipped`, `errors`).
+- Podczas bootstrapowej segregacji kolizje nazw są obsługiwane polityką `skip` (bez nadpisywania), a pojedyncze błędy I/O nie zatrzymują całego etapu.
 - Komenda `apply` aktualizuje status propozycji, synchronizuje `taxonomy.json` i wykonuje przeniesienie plików `candidate_files` do docelowej sciezki kategorii.
 - Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
 - Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
