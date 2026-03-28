@@ -41,10 +41,24 @@ class Milestone6LearningTest(unittest.TestCase):
                 details={"suggested_category": "invoice"},
             ),
             LearningSignal(
+                signal_id="sig_001b",
+                signal_type="manual_rename",
+                category="documents",
+                file_path="/tmp/final_invoice_2.pdf",
+                details={"suggested_category": "invoice"},
+            ),
+            LearningSignal(
                 signal_id="sig_002",
                 signal_type="review_rejected",
                 category="documents",
                 file_path="/tmp/documents/invoices",
+                details={"proposed_category": "invoices"},
+            ),
+            LearningSignal(
+                signal_id="sig_003",
+                signal_type="review_rejected",
+                category="documents",
+                file_path="/tmp/documents/invoices_2",
                 details={"proposed_category": "invoices"},
             ),
         ]
@@ -56,3 +70,31 @@ class Milestone6LearningTest(unittest.TestCase):
         self.assertIn("create_subcategory", proposal_types)
         self.assertIn("merge_category", proposal_types)
         self.assertIn("dead_category", proposal_types)
+
+    def test_evolution_engine_filters_singletons_and_low_quality_tokens(self) -> None:
+        signals = [
+            LearningSignal(
+                signal_id="sig_010",
+                signal_type="manual_rename",
+                category="documents",
+                file_path="/tmp/a",
+                details={"suggested_category": "2501"},
+            ),
+            LearningSignal(
+                signal_id="sig_011",
+                signal_type="manual_rename",
+                category="documents",
+                file_path="/tmp/b",
+                details={"suggested_category": "cv"},
+            ),
+            LearningSignal(
+                signal_id="sig_012",
+                signal_type="manual_rename",
+                category="documents",
+                file_path="/tmp/c",
+                details={"suggested_category": "invoice"},
+            ),
+        ]
+
+        proposals = EvolutionEngine().build_proposals(signals, {})
+        self.assertEqual(proposals, [])

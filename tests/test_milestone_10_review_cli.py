@@ -31,9 +31,9 @@ class Milestone10ReviewCliTest(unittest.TestCase):
         self.assertEqual(parts[1], "pending")
         self.assertEqual(parts[5], "documents/guides")
         self.assertEqual(parts[6], "2")
-        self.assertTrue(parts[7].endswith("..."))
+        self.assertEqual(len(parts), 7)
 
-    def test_print_review_items_verbose_mode_contains_candidate_preview(self) -> None:
+    def test_print_review_items_verbose_mode_keeps_minimal_format(self) -> None:
         item = ReviewItem(
             item_id="rev_002",
             item_type="create_category",
@@ -53,8 +53,8 @@ class Milestone10ReviewCliTest(unittest.TestCase):
         parts = line.split("\t")
 
         self.assertEqual(parts[0], "rev_002")
-        self.assertEqual(parts[7], "Pelne uzasadnienie.")
-        self.assertEqual(parts[8], "/tmp/a.png,/tmp/b.png,/tmp/c.png")
+        self.assertEqual(parts[6], "4")
+        self.assertEqual(len(parts), 7)
 
 
 if __name__ == "__main__":

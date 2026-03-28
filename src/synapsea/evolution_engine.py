@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 from collections import Counter
+import re
 
 from synapsea.models import LearningSignal, ReviewItem, TaxonomyNode
+
+
+MIN_REPEAT_SIGNAL_COUNT = 2
 
 
 class EvolutionEngine:
@@ -16,12 +20,12 @@ class EvolutionEngine:
         next_index = start_index
 
         rename_tokens = [
-            signal.details.get("suggested_category")
+            _normalize_token(str(signal.details.get("suggested_category", "")))
             for signal in signals
             if signal.signal_type == "manual_rename" and signal.details.get("suggested_category")
         ]
         for token, count in Counter(rename_tokens).items():
-            if count < 1:
+            if not token or count < MIN_REPEAT_SIGNAL_COUNT or not _is_valid_rename_token(token):
                 continue
             proposals.append(
                 ReviewItem(
@@ -45,7 +49,7 @@ class EvolutionEngine:
             if signal.signal_type == "review_rejected" and signal.details.get("proposed_category")
         )
         for category_name, count in rejected_categories.items():
-            if count < 1 or not category_name:
+            if count < MIN_REPEAT_SIGNAL_COUNT or not category_name:
                 continue
             proposals.append(
                 ReviewItem(
@@ -82,3 +86,24 @@ class EvolutionEngine:
                 next_index += 1
 
         return proposals
+
+
+def _normalize_token(token: str) -> str:
+    compact = re.sub(r"\s+", " ", token.strip())
+    return compact
+
+
+def _is_valid_rename_token(token: str) -> bool:
+    normalized = token.strip().lower()
+    if len(normalized) < 3:
+        return False
+    if re.fullmatch(r"\d+", normalized):
+        return False
+    if not re.search(r"[a-ząćęłńóśźż]", normalized):
+        return False
+    compact = re.sub(r"[^a-z0-9ąćęłńóśźż]", "", normalized)
+    digits = sum(char.isdigit() for char in compact)
+    letters = sum(char.isalpha() for char in compact)
+    if digits and digits >= letters:
+        return False
+    return True

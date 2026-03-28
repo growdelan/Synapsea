@@ -51,7 +51,7 @@ class Milestone19PreferencesCliTest(unittest.TestCase):
             self.assertIn("documents::finance", text)
             self.assertIn("invoice -> documents/finance", text)
 
-    def test_review_verbose_prints_confidence_breakdown(self) -> None:
+    def test_review_verbose_keeps_minimal_columns(self) -> None:
         item = ReviewItem(
             item_id="rev_001",
             item_type="create_category",
@@ -72,11 +72,12 @@ class Milestone19PreferencesCliTest(unittest.TestCase):
 
         _print_review_items([item], verbose=True, out=out)
         line = out.getvalue().strip()
+        parts = line.split("\t")
 
-        self.assertIn("base=0.78", line)
-        self.assertIn("pref=+0.08", line)
-        self.assertIn("final=0.86", line)
-        self.assertIn("reasons=pair:+0.050,token:+0.030", line)
+        self.assertEqual(parts[0], "rev_001")
+        self.assertEqual(parts[1], "pending")
+        self.assertEqual(parts[6], "1")
+        self.assertEqual(len(parts), 7)
 
 
 if __name__ == "__main__":

@@ -170,41 +170,12 @@ def main(argv: list[str] | None = None) -> int:
 def _print_review_items(items, verbose: bool = False, out: TextIO | None = None) -> None:
     output = out or StringIO()
     for item in items:
-        reason = item.reason if verbose else _truncate(item.reason, 60)
-        base = (
+        line = (
             f"{item.item_id}\t{item.status}\t{item.parent_category}\t"
             f"{item.proposed_category}\t{item.confidence:.2f}\t"
-            f"{item.target_path}\t{len(item.candidate_files)}\t{reason}"
+            f"{item.target_path}\t{len(item.candidate_files)}"
         )
-        if verbose:
-            candidate_preview = ",".join(item.candidate_files[:3])
-            breakdown = _format_confidence_breakdown(item)
-            line = f"{base}\t{candidate_preview}\t{breakdown}"
-        else:
-            line = base
         if out is None:
             print(line)
         else:
             output.write(f"{line}\n")
-
-
-def _truncate(text: str, max_len: int) -> str:
-    if len(text) <= max_len:
-        return text
-    return f"{text[: max_len - 3]}..."
-
-
-def _format_confidence_breakdown(item) -> str:
-    if (
-        item.base_confidence is None
-        or item.preference_delta is None
-        or item.final_confidence is None
-    ):
-        return "base=NA pref=NA final=NA reasons=-"
-    reasons = ",".join(item.preference_reasons) if item.preference_reasons else "-"
-    return (
-        f"base={item.base_confidence:.2f} "
-        f"pref={item.preference_delta:+.2f} "
-        f"final={item.final_confidence:.2f} "
-        f"reasons={reasons}"
-    )
