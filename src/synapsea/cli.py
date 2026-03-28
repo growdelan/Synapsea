@@ -10,69 +10,52 @@ from synapsea.pipeline import SynapseaApp
 from synapsea.watcher import WatchService
 
 
+def add_shared_runtime_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
+    parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
+    parser.add_argument(
+        "--ollama-model",
+        type=str,
+        default=None,
+        help="Nazwa modelu Ollama uzywanego podczas interpretacji AI.",
+    )
+    parser.add_argument(
+        "--skip-ai",
+        action="store_true",
+        help="Pomin interpretacje AI i zapis propozycji do review queue.",
+    )
+    parser.add_argument(
+        "--ai-budget",
+        type=int,
+        default=None,
+        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
+    )
+    parser.add_argument(
+        "--ai-max-examples",
+        type=int,
+        default=None,
+        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="synapsea")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     run_parser = subparsers.add_parser("run", help="Uruchom pipeline klasyfikacji.")
-    run_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
-    run_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
-    run_parser.add_argument(
-        "--ollama-model",
-        type=str,
-        default=None,
-        help="Nazwa modelu Ollama uzywanego podczas interpretacji AI.",
-    )
-    run_parser.add_argument(
-        "--ai-budget",
-        type=int,
-        default=None,
-        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
-    )
-    run_parser.add_argument(
-        "--ai-max-examples",
-        type=int,
-        default=None,
-        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
-    )
+    add_shared_runtime_arguments(run_parser)
 
     watch_parser = subparsers.add_parser("watch", help="Uruchom ciagly monitoring zmian w katalogu.")
-    watch_parser.add_argument("--source", type=Path, default=None, help="Katalog do analizy.")
-    watch_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
-    watch_parser.add_argument(
-        "--ollama-model",
-        type=str,
-        default=None,
-        help="Nazwa modelu Ollama uzywanego podczas interpretacji AI.",
-    )
-    watch_parser.add_argument(
-        "--skip-ai",
-        action="store_true",
-        help="Pomin interpretacje AI i zapis propozycji do review queue.",
-    )
-    watch_parser.add_argument(
-        "--ai-budget",
-        type=int,
-        default=None,
-        help="Maksymalna liczba wywolan AI na pojedynczy przebieg.",
-    )
-    watch_parser.add_argument(
-        "--ai-max-examples",
-        type=int,
-        default=None,
-        help="Maksymalna liczba przykladowych plikow przekazywanych do AI.",
-    )
+    add_shared_runtime_arguments(watch_parser)
     watch_parser.add_argument(
         "--watch-interval",
         type=float,
         default=None,
         help="Interwal odswiezania watchera w sekundach.",
     )
-    run_parser.add_argument(
-        "--skip-ai",
-        action="store_true",
-        help="Pomin interpretacje AI i zapis propozycji do review queue.",
-    )
+
+    tui_parser = subparsers.add_parser("tui", help="Uruchom terminalowy interfejs TUI.")
+    add_shared_runtime_arguments(tui_parser)
 
     review_parser = subparsers.add_parser("review", help="Pokaz zapisane propozycje review.")
     review_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
@@ -153,6 +136,12 @@ def main(argv: list[str] | None = None) -> int:
             poll_interval_seconds=config.watch_poll_interval_seconds,
         )
         watcher.run_forever()
+        return 0
+    if args.command == "tui":
+        from synapsea.tui.app import SynapseaTuiApp
+
+        tui_app = SynapseaTuiApp.from_config(config)
+        tui_app.run()
         return 0
     if args.command == "preferences":
         lines = app.preferences_summary(

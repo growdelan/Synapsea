@@ -29,6 +29,13 @@ uv run python -m synapsea watch --source ~/Downloads --data-dir ./data --watch-i
 uv run python -m synapsea watch --source ~/Downloads --data-dir ./data --watch-interval 2 --ollama-model qwen2.5:7b
 ```
 
+Terminalowy interfejs TUI:
+
+```bash
+uv run python -m synapsea tui
+uv run python -m synapsea tui --source ~/Downloads --data-dir ./data --skip-ai
+```
+
 Przeglad propozycji review:
 
 ```bash
@@ -56,6 +63,7 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Dane aplikacji są zapisywane w katalogu `./data`.
 - Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `gemma3:4b-it-qat`.
 - Komendy `run` i `watch` wspierają `--ollama-model`, aby wskazać model dla bieżącego uruchomienia.
+- Komenda `tui` uruchamia terminalowy frontend Textual i przyjmuje ten sam bazowy zestaw opcji runtime co `run`.
 - Domyślny timeout żądania do Ollama wynosi `60` sekund.
 - Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
 - Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).

@@ -54,6 +54,9 @@
 - Komenda `review` (także z flagą `--verbose`) zwraca obecnie zwięzły, stały format kolumn: `id`, `status`, `parent_category`, `proposed_category`, `confidence`, `target_path`, `candidate_count`.
 - Działa pełna pętla PRD 004: `apply/reject` aktualizuje preferencje, a kolejne propozycje review uwzględniają wyuczony sygnał.
 - Generowanie propozycji ewolucji (`evo_*`) zostało utwardzone przez próg powtarzalności i filtr jakości tokenów, aby ograniczyć szum w review.
+- Repo zawiera PRD 005 (`prd/005-textual-tui-workstation-pl.md`) oraz rozszerzoną specyfikację i roadmapę dla terminalowego frontendowego TUI.
+- Dostępna jest komenda CLI `tui`, która uruchamia minimalną aplikację Textual z dashboardem startowym.
+- Istnieje cienki `AppController` dla TUI, który korzysta bezpośrednio z `SynapseaApp` i buduje snapshot dashboardu bez subprocessów.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -92,15 +95,16 @@
 - Zrealizowano `Milestone 18: Scoring preferencji i explainability review`.
 - Zrealizowano `Milestone 19: CLI preferences i wgląd w confidence breakdown`.
 - Zrealizowano `Milestone 20: Stabilizacja end-to-end PRD 004`.
+- Zrealizowano `Milestone 21: Fundament TUI i redukcja ryzyka`.
 
 ## Co jest w trakcie
-- Wszystkie milestone’y z aktualnej roadmapy (`0.5-20`) są oznaczone jako `done`.
+- Następnym milestone’em do realizacji jest `Milestone 22: Dashboard i run now`.
 
 ## Co jest następne
-- Wyznaczenie kolejnego zakresu po domknięciu PRD 004.
-- Dalsza poprawa jakości i trafności preferencji dla długich, technicznych ścieżek.
-- Rozważenie opcjonalnego modułu ręcznych override’ów preferencji w osobnym przyroście.
-- Rozszerzenie CLI o batchowe decyzje review (masowe `apply/reject`) dla szybszej pracy na większych kolejkach.
+- Realizacja `Milestone 22: Dashboard i run now`.
+- Realizacja `Milestone 23: Review screen, focus i multi-select`.
+- Realizacja `Milestone 24: Batch apply/reject i odporność operacyjna`.
+- Realizacja `Milestone 25: Ergonomia etapu 2 TUI`.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -108,6 +112,8 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: dodano `prd/005-textual-tui-workstation-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 21-25.
+- 2026-03-28: zrealizowano `Milestone 21`, dodając zależność `textual`, komendę `tui`, minimalny dashboard startowy i testy fundamentu TUI.
 - 2026-03-28: uproszczono output `review` do stałego zestawu kolumn i zredukowano szum propozycji `evo_*` przez filtr jakości.
 - 2026-03-28: dodano `prd/004-user-preference-learning-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 15-20.
 - 2026-03-28: zrealizowano `Milestone 15`, dodając kontrakty kompatybilności ReviewItem/review queue oraz testy regresyjne.

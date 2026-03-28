@@ -4,7 +4,7 @@
 Krótki opis celu aplikacji:
 - Rozwiązuje problem chaotycznej, ręcznie utrzymywanej struktury plików poprzez lokalne analizowanie plików, wykrywanie wzorców i proponowanie sensownej, rozwijającej się taksonomii danych.
 - Jest skierowana do użytkownika pracującego lokalnie na własnych zbiorach plików, który chce porządkować dane bez stałego ręcznego kategoryzowania.
-- Zakres obejmuje lokalną klasyfikację plików, ekstrakcję cech, wykrywanie wzorców, generowanie propozycji zmian w strukturze, obsługę review przez CLI oraz wykonawcze przenoszenie plików po zatwierdzeniu propozycji.
+- Zakres obejmuje lokalną klasyfikację plików, ekstrakcję cech, wykrywanie wzorców, generowanie propozycji zmian w strukturze, obsługę review przez CLI, wykonawcze przenoszenie plików po zatwierdzeniu propozycji oraz terminalowy frontend TUI do operacyjnej obsługi głównego workflow.
 - Poza zakresem MVP są: GUI, pełna automatyzacja zmian bez zgody użytkownika, zaawansowane embeddings, integracje z zewnętrznymi usługami oraz przetwarzanie wieloźródłowe.
 - Pierwsza wersja wspiera wyłącznie środowisko macOS.
 
@@ -33,6 +33,7 @@ Opis funkcjonalności na wysokim poziomie:
 - W kolejnym przyroście (PRD 002) warstwa review jest rozszerzana o czytelniejszy widok CLI oraz deduplikację semantyczną propozycji.
 - W kolejnym przyroście (PRD 003) `apply` może wykonywać przeniesienia plików po akceptacji review, a komendy `run/watch` przyjmują argument wyboru modelu `--ollama-model`.
 - W kolejnym przyroście (PRD 004) system uczy się preferencji użytkownika na podstawie decyzji `apply/reject` i używa ich do korekty rankingu propozycji review.
+- W kolejnym przyroście (PRD 005) system udostępnia keyboard-first TUI oparte o Textual jako dodatkowy frontend terminalowy dla dashboardu, review, batch `apply/reject` oraz uruchamiania `run`.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -47,7 +48,8 @@ Opis architektury na poziomie koncepcyjnym.
    - silnik detekcji wzorców i klastrów działający bez AI,
    - warstwa interpretacji AI wykorzystująca lokalny model Ollama do oceny kandydatów na nowe kategorie,
    - warstwa review i zarządzania taksonomią odpowiedzialna za zapis propozycji i obsługę decyzji użytkownika,
-   - interfejs CLI do uruchamiania procesu i obsługi review.
+   - interfejs CLI do uruchamiania procesu i obsługi review,
+   - warstwa TUI oparta o Textual do operacyjnej nawigacji po dashboardzie i review.
 2. Przepływ danych między komponentami
    - pliki z folderu wejściowego trafiają do skanera,
    - skaner przekazuje dane do ekstrakcji cech i klasyfikacji,
@@ -62,7 +64,8 @@ Opis architektury na poziomie koncepcyjnym.
    - komponenty heurystyczne odpowiadają za wykrywanie wzorców i przygotowanie danych wejściowych dla AI,
    - komponent AI odpowiada wyłącznie za interpretację kandydatów i rekomendacje,
    - komponent review decyduje o trwałym zapisaniu propozycji i chroni przed nieautoryzowanymi zmianami struktury,
-   - warstwa CLI nie implementuje logiki analitycznej, a jedynie udostępnia operacje użytkownika.
+   - warstwa CLI nie implementuje logiki analitycznej, a jedynie udostępnia operacje użytkownika,
+   - warstwa TUI nie implementuje logiki domenowej, a jedynie orkiestruje istniejący backend przez cienki kontroler aplikacji.
 
 ---
 
@@ -88,6 +91,10 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - trwałe przechowywanie taksonomii, kolejki review i historii decyzji.
 - CLI:
   - uruchamianie procesu, przegląd sugestii oraz akceptacja lub odrzucanie decyzji.
+- `tui_controller` (dotyczy PRD: 005-textual-tui-workstation-pl.md):
+  - adapter pomiędzy Textual a `SynapseaApp`, odpowiedzialny za budowę snapshotów dashboardu, uruchamianie `run` i agregację wyników batch.
+- TUI Textual (dotyczy PRD: 005-textual-tui-workstation-pl.md):
+  - ekran dashboardu, ekran review, modale potwierdzeń i formularz `run with options`.
 - `apply_executor` (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md):
   - wykonawcza warstwa przenoszenia plików po zatwierdzeniu review item przez `apply`.
   - obsługa polityki kolizji `skip + raport` bez nadpisywania istniejących plików.
@@ -230,6 +237,20 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Formuła scoringu preferencji musi ograniczać overfitting i wzmacniać wpływ dopiero po powtarzalnym sygnale.
 
+- Decyzja:
+  - Terminalowy frontend TUI jest budowany w oparciu o `textual` jako dodatkowy interfejs obok istniejącego CLI (dotyczy PRD: 005-textual-tui-workstation-pl.md).
+  Uzasadnienie:
+  - PRD 005 wymaga keyboard-first TUI z ekranami, batch actions i modalami, bez budowy osobnego GUI desktopowego lub webowego.
+  Konsekwencje:
+  - Repo dodaje zależność `textual`, a testy obejmują zarówno controller, jak i kluczowe przepływy integracyjne TUI.
+
+- Decyzja:
+  - TUI pozostaje cienką warstwą prezentacji i orkiestracji, a główna ścieżka integracji z backendem korzysta bezpośrednio z `SynapseaApp`, nie z subprocessów CLI (dotyczy PRD: 005-textual-tui-workstation-pl.md).
+  Uzasadnienie:
+  - Celem przyrostu jest poprawa ergonomii bez duplikowania logiki domenowej i bez budowania drugiego backendu.
+  Konsekwencje:
+  - Potrzebny jest jawny kontrakt kontrolera TUI oraz adaptery wyników operacji `run/apply/reject` do stanu interfejsu.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -267,4 +288,4 @@ Wspólne wymagania jakościowe dla całego projektu.
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
 - Ostatnia aktualizacja: 2026-03-28
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md` oraz przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md`
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`, przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md` oraz przyrost terminalowego frontendowego TUI opisany w `prd/005-textual-tui-workstation-pl.md`

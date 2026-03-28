@@ -443,3 +443,103 @@ Zakres:
 - testy integracyjne end-to-end dla PRD 004
 - końcowa walidacja kompatybilności i wydajnościowej lekkości rozwiązania
 - finalizacja dokumentacji i domknięcie operacyjne zmiany
+
+---
+
+## Milestone 21: Fundament TUI i redukcja ryzyka (done)
+
+Cel:
+- dodać minimalny, stabilny punkt wejścia TUI bez naruszania istniejącego CLI
+- zredukować ryzyko przeniesienia logiki domenowej do warstwy interfejsu
+
+Definition of Done:
+- projekt ma zależność `textual` uzasadnioną w specyfikacji
+- dostępna jest komenda `tui` w istniejącym parserze CLI
+- istnieje szkielet pakietu `src/synapsea/tui/` z aplikacją Textual i cienkim kontrolerem
+- `uv run python -m synapsea tui` uruchamia aplikację i nie wprowadza regresji starego CLI
+
+Zakres:
+- dodanie zależności `textual`
+- rozszerzenie parsera CLI o komendę `tui`
+- przygotowanie struktury TUI oraz kontraktu kontrolera opartego o `SynapseaApp`
+- testy parsera i minimalnego startu aplikacji
+
+---
+
+## Milestone 22: Dashboard i run now (planned)
+
+Cel:
+- udostępnić ekran startowy dashboardu z podstawowym stanem systemu
+- umożliwić uruchamianie `run` z poziomu TUI z automatycznym odświeżeniem danych
+
+Definition of Done:
+- dashboard pokazuje podstawową konfigurację i liczniki review per status
+- dostępna jest akcja `run now` wywołująca backend bez użycia subprocessów
+- po zakończeniu `run` dashboard i review queue są odświeżane
+- błędy `run` są raportowane w TUI bez crashowania aplikacji
+
+Zakres:
+- implementacja snapshotu dashboardu i podstawowego ekranu startowego
+- integracja akcji `run now` przez kontroler TUI
+- raportowanie wyniku ostatniej operacji i odświeżanie danych
+- testy controllera i podstawowego przepływu dashboard -> run
+
+---
+
+## Milestone 23: Review screen, focus i multi-select (planned)
+
+Cel:
+- zbudować główny ekran review do codziennej pracy na kolejce propozycji
+- zapewnić rozdzielenie stanu focusa i batch selection
+
+Definition of Done:
+- istnieje ekran review z listą, panelem szczegółów i paskiem skrótów
+- domyślnie pokazywane są tylko pozycje `pending`, z możliwością przełączenia na wszystkie statusy
+- użytkownik może zaznaczać wiele elementów bez utraty zaznaczenia przy zmianie focusa
+- zmiana filtra czyści zaznaczenie ukrytych pozycji, a sortowanie zachowuje zaznaczenie widocznych rekordów
+
+Zakres:
+- implementacja ekranu review i modelu nawigacji keyboard-first
+- dodanie stanu focusa, zaznaczeń i podstawowych akcji zaznaczania
+- podstawowe filtrowanie statusów i odświeżanie szczegółów wybranego rekordu
+- testy controllera oraz kluczowych zachowań ekranu review
+
+---
+
+## Milestone 24: Batch apply/reject i odporność operacyjna (planned)
+
+Cel:
+- domknąć TUI o sekwencyjne operacje batch dla review queue
+- zapewnić bezpieczeństwo, potwierdzenia i odporność na błędy pojedynczych elementów
+
+Definition of Done:
+- batch `apply` i `reject` działają dla zaznaczonych pozycji
+- przed batch `apply` i `reject` pojawia się modal potwierdzenia
+- raport końcowy agreguje sukcesy, błędy oraz liczniki `moved/skipped/errors` dla `apply`
+- błąd pojedynczego elementu nie przerywa całego batcha ani nie crashuje aplikacji
+
+Zakres:
+- implementacja modali potwierdzeń i agregacji raportów batch
+- sekwencyjne wykonanie `apply_selected` i `reject_selected`
+- auto-refresh dashboardu i review po operacjach
+- testy batch actions i scenariuszy błędów częściowych
+
+---
+
+## Milestone 25: Ergonomia etapu 2 TUI (planned)
+
+Cel:
+- rozszerzyć TUI o ergonomię z drugiego etapu PRD 005 bez wychodzenia poza ten przyrost
+- poprawić wygodę codziennej pracy na review i uruchamianiu pipeline
+
+Definition of Done:
+- dostępny jest formularz lub modal `run with options`
+- review wspiera filtr tekstowy oraz sortowanie po `confidence` i liczbie `candidate_files`
+- użytkownik może otworzyć pełniejszy podgląd szczegółów aktualnej pozycji
+- komunikaty stanu i wyników są bardziej czytelne, a stare CLI pozostaje bez regresji
+
+Zakres:
+- implementacja `run with options` oparta o `AppConfig`
+- dodanie prostego filtra tekstowego i sortowania review
+- rozszerzenie panelu lub modalu szczegółów
+- testy controllera, formattera stanu i kluczowych przepływów ergonomicznych
