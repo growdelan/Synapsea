@@ -51,8 +51,9 @@
 - Review item zawiera explainability (`base_confidence`, `preference_delta`, `final_confidence`, `preference_reasons`).
 - Ranking kolejki review wykorzystuje finalny confidence, zachowując priorytet statusu `pending`.
 - Dostępna jest komenda CLI `preferences` z opcjami `--verbose` i `--limit`.
-- `review --verbose` pokazuje breakdown confidence (`base/pref/final/reasons`) gdy pola są dostępne.
+- Komenda `review` (także z flagą `--verbose`) zwraca obecnie zwięzły, stały format kolumn: `id`, `status`, `parent_category`, `proposed_category`, `confidence`, `target_path`, `candidate_count`.
 - Działa pełna pętla PRD 004: `apply/reject` aktualizuje preferencje, a kolejne propozycje review uwzględniają wyuczony sygnał.
+- Generowanie propozycji ewolucji (`evo_*`) zostało utwardzone przez próg powtarzalności i filtr jakości tokenów, aby ograniczyć szum w review.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -99,6 +100,7 @@
 - Wyznaczenie kolejnego zakresu po domknięciu PRD 004.
 - Dalsza poprawa jakości i trafności preferencji dla długich, technicznych ścieżek.
 - Rozważenie opcjonalnego modułu ręcznych override’ów preferencji w osobnym przyroście.
+- Rozszerzenie CLI o batchowe decyzje review (masowe `apply/reject`) dla szybszej pracy na większych kolejkach.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -106,6 +108,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: uproszczono output `review` do stałego zestawu kolumn i zredukowano szum propozycji `evo_*` przez filtr jakości.
 - 2026-03-28: dodano `prd/004-user-preference-learning-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 15-20.
 - 2026-03-28: zrealizowano `Milestone 15`, dodając kontrakty kompatybilności ReviewItem/review queue oraz testy regresyjne.
 - 2026-03-28: zrealizowano `Milestone 16`, dodając trwałe repozytorium preferencji i testy read/write dla `user_preferences.json`.

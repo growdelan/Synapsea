@@ -62,7 +62,7 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - `watch` uruchamia pętlę monitoringu i przyjmuje `--watch-interval` (sekundy).
 - `review` domyślnie pokazuje tylko pozycje `pending`.
 - `review --all-statuses` pokazuje także pozycje `applied` i `rejected`.
-- `review` pokazuje rozszerzony kontekst (`target_path`, liczba kandydatów, skrót uzasadnienia), a `--verbose` pokazuje pełne uzasadnienie, podgląd plików i breakdown confidence (`base/pref/final/reasons`) gdy dane są dostępne.
+- `review` pokazuje zwięzły, stały format: `id`, `status`, `parent_category`, `proposed_category`, `confidence`, `target_path`, `candidate_count`.
 - Komenda `preferences` pokazuje top wyuczonych preferencji (pozytywnych i negatywnych) dla par propozycji oraz mapowań token/heurystyka.
 - Kolejka review deduplikuje semantycznie podobne propozycje (np. warianty nazwy różniące się formatowaniem), nie tylko identyczne `cluster_id`.
 - Lista review jest rankowana: najpierw `pending`, potem wyższy confidence i bogatszy kontekst (więcej plików kandydujących).
