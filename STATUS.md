@@ -95,14 +95,15 @@
 - Zrealizowano `Milestone 19: CLI preferences i wgląd w confidence breakdown`.
 - Zrealizowano `Milestone 20: Stabilizacja end-to-end PRD 004`.
 - Zrealizowano `Milestone 21: Kontrakt CLI dla batch apply/reject`.
+- Zrealizowano `Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji`.
 
 ## Co jest w trakcie
-- `Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji` ma status `planned`.
+- Wszystkie milestone’y z aktualnej roadmapy (`0.5-22`) są oznaczone jako `done`.
 
 ## Co jest następne
-- Realizacja `Milestone 22` przez przeniesienie sekwencyjnego wykonania batch do warstwy backendowej.
-- Domknięcie testów integracyjnych sukcesu i częściowych błędów dla batch `apply/reject`.
-- Aktualizacja dokumentacji operacyjnej po zakończeniu pełnego zakresu PRD 005.
+- Wyznaczenie kolejnego zakresu po domknięciu PRD 005.
+- Dalsza poprawa jakości i trafności preferencji dla długich, technicznych ścieżek.
+- Rozważenie opcjonalnego modułu ręcznych override’ów preferencji w osobnym przyroście.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -110,6 +111,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: zrealizowano `Milestone 22`, przenosząc sekwencyjne wykonanie batch `apply/reject` do backendu i domykając testy regresyjne PRD 005.
 - 2026-03-28: zrealizowano `Milestone 21`, dodając kontrakt CLI dla batch `apply/reject` (wiele ID, raport zbiorczy i politykę kodu wyjścia).
 - 2026-03-28: dodano `prd/005-batch-apply-reject-cli.md` oraz rozszerzono `spec.md` i `ROADMAP.md` o zakres PRD 005 i milestone’y 21-22.
 - 2026-03-28: uproszczono output `review` do stałego zestawu kolumn i zredukowano szum propozycji `evo_*` przez filtr jakości.

@@ -465,7 +465,7 @@ Zakres:
 
 ---
 
-## Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji (planned)
+## Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji (done)
 
 Cel:
 - zapewnić stabilne, sekwencyjne wykonanie wielu `apply/reject` w warstwie aplikacji

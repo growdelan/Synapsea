@@ -136,47 +136,20 @@ def main(argv: list[str] | None = None) -> int:
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
-        requested = len(args.item_ids)
-        succeeded = 0
-        failed = 0
-        moved = 0
-        skipped = 0
-        errors = 0
-        for item_id in args.item_ids:
-            try:
-                applied, report = app.apply_review_item(item_id)
-            except Exception as exc:
-                failed += 1
-                print(f"Apply failed {item_id}: {exc}")
-                continue
-            succeeded += 1
-            moved += report.moved
-            skipped += report.skipped
-            errors += report.errors
-            print(
-                f"Applied {applied.item_id} -> {applied.target_path} "
-                f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
-            )
+        report = app.apply_review_items(args.item_ids)
+        for failure in report.failures or []:
+            print(f"Apply failed {failure}")
         print(
-            f"Batch apply requested={requested} succeeded={succeeded} failed={failed} "
-            f"moved={moved} skipped={skipped} errors={errors}"
+            f"Batch apply requested={report.requested} succeeded={report.succeeded} failed={report.failed} "
+            f"moved={report.moved} skipped={report.skipped} errors={report.errors}"
         )
-        return 0 if failed == 0 else 1
+        return 0 if report.failed == 0 else 1
     if args.command == "reject":
-        requested = len(args.item_ids)
-        succeeded = 0
-        failed = 0
-        for item_id in args.item_ids:
-            try:
-                rejected = app.reject_review_item(item_id)
-            except Exception as exc:
-                failed += 1
-                print(f"Reject failed {item_id}: {exc}")
-                continue
-            succeeded += 1
-            print(f"Rejected {rejected.item_id}")
-        print(f"Batch reject requested={requested} succeeded={succeeded} failed={failed}")
-        return 0 if failed == 0 else 1
+        report = app.reject_review_items(args.item_ids)
+        for failure in report.failures or []:
+            print(f"Reject failed {failure}")
+        print(f"Batch reject requested={report.requested} succeeded={report.succeeded} failed={report.failed}")
+        return 0 if report.failed == 0 else 1
     if args.command == "watch":
         watcher = WatchService(
             app=app,

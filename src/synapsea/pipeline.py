@@ -42,6 +42,18 @@ class ApplyMoveReport:
     errors: int = 0
 
 
+@dataclass(slots=True)
+class BatchReviewReport:
+    action_name: str
+    requested: int
+    succeeded: int = 0
+    failed: int = 0
+    moved: int = 0
+    skipped: int = 0
+    errors: int = 0
+    failures: list[str] | None = None
+
+
 class SynapseaApp:
     def __init__(
         self,
@@ -386,6 +398,41 @@ class SynapseaApp:
         )
         self._learn_from_review_decision(item, accepted=False)
         return item
+
+    def apply_review_items(self, item_ids: list[str]) -> BatchReviewReport:
+        report = BatchReviewReport(
+            action_name="apply",
+            requested=len(item_ids),
+            failures=[],
+        )
+        for item_id in item_ids:
+            try:
+                _item, move_report = self.apply_review_item(item_id)
+            except Exception as exc:
+                report.failed += 1
+                report.failures.append(f"{item_id}: {exc}")
+                continue
+            report.succeeded += 1
+            report.moved += move_report.moved
+            report.skipped += move_report.skipped
+            report.errors += move_report.errors
+        return report
+
+    def reject_review_items(self, item_ids: list[str]) -> BatchReviewReport:
+        report = BatchReviewReport(
+            action_name="reject",
+            requested=len(item_ids),
+            failures=[],
+        )
+        for item_id in item_ids:
+            try:
+                self.reject_review_item(item_id)
+            except Exception as exc:
+                report.failed += 1
+                report.failures.append(f"{item_id}: {exc}")
+                continue
+            report.succeeded += 1
+        return report
 
     def _learn_from_review_decision(self, item: ReviewItem, *, accepted: bool) -> None:
         if self.user_preferences is None:
