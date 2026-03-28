@@ -88,11 +88,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     apply_parser = subparsers.add_parser("apply", help="Zatwierdz propozycje review.")
-    apply_parser.add_argument("item_id", help="Id propozycji review.")
+    apply_parser.add_argument("item_ids", nargs="+", help="Id propozycji review.")
     apply_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
 
     reject_parser = subparsers.add_parser("reject", help="Odrzuc propozycje review.")
-    reject_parser.add_argument("item_id", help="Id propozycji review.")
+    reject_parser.add_argument("item_ids", nargs="+", help="Id propozycji review.")
     reject_parser.add_argument("--data-dir", type=Path, default=None, help="Katalog danych aplikacji.")
 
     preferences_parser = subparsers.add_parser("preferences", help="Pokaz podsumowanie preferencji.")
@@ -136,16 +136,47 @@ def main(argv: list[str] | None = None) -> int:
         _print_review_items(items, verbose=getattr(args, "verbose", False))
         return 0
     if args.command == "apply":
-        applied, report = app.apply_review_item(args.item_id)
+        requested = len(args.item_ids)
+        succeeded = 0
+        failed = 0
+        moved = 0
+        skipped = 0
+        errors = 0
+        for item_id in args.item_ids:
+            try:
+                applied, report = app.apply_review_item(item_id)
+            except Exception as exc:
+                failed += 1
+                print(f"Apply failed {item_id}: {exc}")
+                continue
+            succeeded += 1
+            moved += report.moved
+            skipped += report.skipped
+            errors += report.errors
+            print(
+                f"Applied {applied.item_id} -> {applied.target_path} "
+                f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
+            )
         print(
-            f"Applied {applied.item_id} -> {applied.target_path} "
-            f"(moved={report.moved}, skipped={report.skipped}, errors={report.errors})"
+            f"Batch apply requested={requested} succeeded={succeeded} failed={failed} "
+            f"moved={moved} skipped={skipped} errors={errors}"
         )
-        return 0
+        return 0 if failed == 0 else 1
     if args.command == "reject":
-        rejected = app.reject_review_item(args.item_id)
-        print(f"Rejected {rejected.item_id}")
-        return 0
+        requested = len(args.item_ids)
+        succeeded = 0
+        failed = 0
+        for item_id in args.item_ids:
+            try:
+                rejected = app.reject_review_item(item_id)
+            except Exception as exc:
+                failed += 1
+                print(f"Reject failed {item_id}: {exc}")
+                continue
+            succeeded += 1
+            print(f"Rejected {rejected.item_id}")
+        print(f"Batch reject requested={requested} succeeded={succeeded} failed={failed}")
+        return 0 if failed == 0 else 1
     if args.command == "watch":
         watcher = WatchService(
             app=app,

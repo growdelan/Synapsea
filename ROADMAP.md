@@ -443,3 +443,41 @@ Zakres:
 - testy integracyjne end-to-end dla PRD 004
 - końcowa walidacja kompatybilności i wydajnościowej lekkości rozwiązania
 - finalizacja dokumentacji i domknięcie operacyjne zmiany
+
+---
+
+## Milestone 21: Kontrakt CLI dla batch apply/reject (done)
+
+Cel:
+- dodać ergonomiczny kontrakt CLI dla obsługi wielu ID w `apply` i `reject`
+- zachować pełną kompatybilność scenariusza pojedynczego ID
+
+Definition of Done:
+- parser CLI przyjmuje wiele ID pozycyjnie dla `apply` i `reject`
+- wynik komendy zwraca raport `requested/succeeded/failed` dla batcha
+- polityka kodów wyjścia jest spójna: `0` bez błędów, `1` przy co najmniej jednym błędzie
+- istnieją testy parsera i kontraktu wyjścia CLI dla pojedynczego i wieloelementowego wywołania
+
+Zakres:
+- rozszerzenie parsera CLI (`nargs='+'`) dla `apply` i `reject`
+- dostosowanie warstwy CLI do raportowania zbiorczego i kodów zakończenia
+- testy kontraktu wejścia/wyjścia dla komend batch
+
+---
+
+## Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji (planned)
+
+Cel:
+- zapewnić stabilne, sekwencyjne wykonanie wielu `apply/reject` w warstwie aplikacji
+- domknąć jakość przez testy częściowych błędów i regresję istniejącego workflow
+
+Definition of Done:
+- batch `apply/reject` przetwarza wszystkie ID w kolejności wejścia, bez przerywania na pierwszym błędzie
+- `apply` agreguje raport `moved/skipped/errors` dla całego batcha
+- częściowa porażka jest jawnie raportowana i nie blokuje sukcesów dla pozostałych ID
+- pełny zestaw testów regresyjnych CLI/review przechodzi
+
+Zakres:
+- implementacja sekwencyjnego executor’a batch dla `apply/reject` w backendzie
+- agregacja metryk wykonawczych `apply` oraz listy błędów per ID
+- testy integracyjne dla sukcesu, częściowej porażki i kompatybilności pojedynczego ID

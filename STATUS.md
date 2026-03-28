@@ -54,6 +54,8 @@
 - Komenda `review` (także z flagą `--verbose`) zwraca obecnie zwięzły, stały format kolumn: `id`, `status`, `parent_category`, `proposed_category`, `confidence`, `target_path`, `candidate_count`.
 - Działa pełna pętla PRD 004: `apply/reject` aktualizuje preferencje, a kolejne propozycje review uwzględniają wyuczony sygnał.
 - Generowanie propozycji ewolucji (`evo_*`) zostało utwardzone przez próg powtarzalności i filtr jakości tokenów, aby ograniczyć szum w review.
+- Komendy CLI `apply` i `reject` przyjmują wiele ID w pojedynczym wywołaniu oraz zwracają raport batch `requested/succeeded/failed`.
+- Batch `apply` agreguje metryki `moved/skipped/errors`, a częściowa porażka batcha kończy się kodem wyjścia `1` bez przerywania całego przetwarzania.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -92,15 +94,15 @@
 - Zrealizowano `Milestone 18: Scoring preferencji i explainability review`.
 - Zrealizowano `Milestone 19: CLI preferences i wgląd w confidence breakdown`.
 - Zrealizowano `Milestone 20: Stabilizacja end-to-end PRD 004`.
+- Zrealizowano `Milestone 21: Kontrakt CLI dla batch apply/reject`.
 
 ## Co jest w trakcie
-- Wszystkie milestone’y z aktualnej roadmapy (`0.5-20`) są oznaczone jako `done`.
+- `Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji` ma status `planned`.
 
 ## Co jest następne
-- Wyznaczenie kolejnego zakresu po domknięciu PRD 004.
-- Dalsza poprawa jakości i trafności preferencji dla długich, technicznych ścieżek.
-- Rozważenie opcjonalnego modułu ręcznych override’ów preferencji w osobnym przyroście.
-- Rozszerzenie CLI o batchowe decyzje review (masowe `apply/reject`) dla szybszej pracy na większych kolejkach.
+- Realizacja `Milestone 22` przez przeniesienie sekwencyjnego wykonania batch do warstwy backendowej.
+- Domknięcie testów integracyjnych sukcesu i częściowych błędów dla batch `apply/reject`.
+- Aktualizacja dokumentacji operacyjnej po zakończeniu pełnego zakresu PRD 005.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -108,6 +110,8 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: zrealizowano `Milestone 21`, dodając kontrakt CLI dla batch `apply/reject` (wiele ID, raport zbiorczy i politykę kodu wyjścia).
+- 2026-03-28: dodano `prd/005-batch-apply-reject-cli.md` oraz rozszerzono `spec.md` i `ROADMAP.md` o zakres PRD 005 i milestone’y 21-22.
 - 2026-03-28: uproszczono output `review` do stałego zestawu kolumn i zredukowano szum propozycji `evo_*` przez filtr jakości.
 - 2026-03-28: dodano `prd/004-user-preference-learning-pl.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o milestone’y 15-20.
 - 2026-03-28: zrealizowano `Milestone 15`, dodając kontrakty kompatybilności ReviewItem/review queue oraz testy regresyjne.

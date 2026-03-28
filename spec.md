@@ -33,6 +33,7 @@ Opis funkcjonalności na wysokim poziomie:
 - W kolejnym przyroście (PRD 002) warstwa review jest rozszerzana o czytelniejszy widok CLI oraz deduplikację semantyczną propozycji.
 - W kolejnym przyroście (PRD 003) `apply` może wykonywać przeniesienia plików po akceptacji review, a komendy `run/watch` przyjmują argument wyboru modelu `--ollama-model`.
 - W kolejnym przyroście (PRD 004) system uczy się preferencji użytkownika na podstawie decyzji `apply/reject` i używa ich do korekty rankingu propozycji review.
+- W kolejnym przyroście (PRD 005) komendy `apply/reject` wspierają batchową obsługę wielu ID w jednym wywołaniu CLI wraz z raportem zbiorczym.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -58,6 +59,7 @@ Opis architektury na poziomie koncepcyjnym.
    - przy `apply` (PRD 003) akceptacja może dodatkowo uruchomić wykonawcze przeniesienia plików `candidate_files` do ścieżki `target_path`.
    - w przyroście inkrementalnym po MVP (PRD 001) system dodatkowo utrzymuje stan wejścia, wylicza deltę zmian i ogranicza przetwarzanie do plików oraz klastrów dotkniętych zmianą.
    - w przyroście PRD 002 system dodatkowo normalizuje propozycje review i ogranicza duplikaty semantyczne, zachowując zgodność komend `apply/reject`.
+   - w przyroście PRD 005 komendy `apply/reject` mogą przetwarzać sekwencyjnie wiele pozycji review i zwracać raport agregowany sukcesów/błędów.
 3. Granice odpowiedzialności
    - komponenty heurystyczne odpowiadają za wykrywanie wzorców i przygotowanie danych wejściowych dla AI,
    - komponent AI odpowiada wyłącznie za interpretację kandydatów i rekomendacje,
@@ -88,6 +90,9 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - trwałe przechowywanie taksonomii, kolejki review i historii decyzji.
 - CLI:
   - uruchamianie procesu, przegląd sugestii oraz akceptacja lub odrzucanie decyzji.
+- `batch_review_executor` (dotyczy PRD: 005-batch-apply-reject-cli.md):
+  - sekwencyjne wykonanie wielu `apply/reject` z agregacją raportu (`requested/succeeded/failed` oraz dla `apply` także `moved/skipped/errors`).
+  - kontynuacja batcha mimo błędów pojedynczych ID.
 - `apply_executor` (dotyczy PRD: 003-apply-file-moves-and-ollama-model-cli.md):
   - wykonawcza warstwa przenoszenia plików po zatwierdzeniu review item przez `apply`.
   - obsługa polityki kolizji `skip + raport` bez nadpisywania istniejących plików.
@@ -230,6 +235,13 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Formuła scoringu preferencji musi ograniczać overfitting i wzmacniać wpływ dopiero po powtarzalnym sygnale.
 
+- Decyzja:
+  - Komendy `apply` i `reject` wspierają przyjmowanie wielu ID pozycyjnie (`apply <id1> <id2> ...`, `reject <id1> <id2> ...`) z polityką kontynuacji batcha mimo błędów pojedynczych pozycji (dotyczy PRD: 005-batch-apply-reject-cli.md).
+  Uzasadnienie:
+  - Dla większych kolejek review użytkownik potrzebuje operacji masowych bez wielokrotnego ręcznego uruchamiania komend.
+  Konsekwencje:
+  - CLI musi raportować wynik zbiorczy i zwracać kod zakończenia `!= 0` przy częściowej porażce.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -267,4 +279,4 @@ Wspólne wymagania jakościowe dla całego projektu.
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
 - Ostatnia aktualizacja: 2026-03-28
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md` oraz przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md`
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`, przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md` oraz przyrost batchowego `apply/reject` opisany w `prd/005-batch-apply-reject-cli.md`
