@@ -526,7 +526,7 @@ Zakres:
 
 ---
 
-## Milestone 25: Ergonomia etapu 2 TUI (planned)
+## Milestone 25: Ergonomia etapu 2 TUI (done)
 
 Cel:
 - rozszerzyć TUI o ergonomię z drugiego etapu PRD 005 bez wychodzenia poza ten przyrost

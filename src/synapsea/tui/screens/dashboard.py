@@ -11,6 +11,7 @@ class DashboardScreen(Screen[None]):
     BINDINGS = [
         ("w", "show_review", "Review"),
         ("r", "run_now", "Run now"),
+        ("R", "run_with_options", "Run options"),
         ("q", "app.quit", "Wyjscie"),
     ]
 
@@ -26,6 +27,7 @@ class DashboardScreen(Screen[None]):
             with Horizontal(id="dashboard-actions"):
                 yield Button("Review", id="show-review")
                 yield Button("Run now", id="run-now", variant="primary")
+                yield Button("Run with options", id="run-with-options")
                 yield Button("Wyjscie", id="quit-app")
         yield Footer()
 
@@ -34,6 +36,8 @@ class DashboardScreen(Screen[None]):
             self.action_show_review()
         if event.button.id == "run-now":
             self.action_run_now()
+        if event.button.id == "run-with-options":
+            self.action_run_with_options()
         if event.button.id == "quit-app":
             self.app.exit()
 
@@ -42,6 +46,9 @@ class DashboardScreen(Screen[None]):
 
     def action_show_review(self) -> None:
         self.app.action_show_review()
+
+    def action_run_with_options(self) -> None:
+        self.app.action_show_run_options()
 
     def update_snapshot(self, snapshot: DashboardSnapshot) -> None:
         self.snapshot = snapshot

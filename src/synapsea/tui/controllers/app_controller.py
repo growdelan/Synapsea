@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from synapsea.config import AppConfig
 from synapsea.pipeline import SynapseaApp
@@ -108,11 +109,17 @@ class AppController:
             self.last_operation_message = f"Processed {processed} file(s)."
         return self.get_dashboard_snapshot()
 
-    def get_review_items(self, *, show_all_statuses: bool = False) -> list[ReviewItemSnapshot]:
+    def get_review_items(
+        self,
+        *,
+        show_all_statuses: bool = False,
+        text_filter: str = "",
+        sort_by: str = "default",
+    ) -> list[ReviewItemSnapshot]:
         items = self.app.list_review_items()
         if not show_all_statuses:
             items = [item for item in items if item.status == "pending"]
-        return [
+        snapshots = [
             ReviewItemSnapshot(
                 item_id=item.item_id,
                 status=item.status,
@@ -126,6 +133,22 @@ class AppController:
             )
             for item in items
         ]
+        query = text_filter.strip().lower()
+        if query:
+            snapshots = [
+                item
+                for item in snapshots
+                if query in item.item_id.lower()
+                or query in item.parent_category.lower()
+                or query in item.proposed_category.lower()
+                or query in item.target_path.lower()
+                or query in item.reason.lower()
+            ]
+        if sort_by == "confidence":
+            snapshots.sort(key=lambda item: (-item.confidence, item.item_id))
+        if sort_by == "candidate_count":
+            snapshots.sort(key=lambda item: (-item.candidate_count, item.item_id))
+        return snapshots
 
     def apply_selected(self, item_ids: list[str]) -> BatchActionReport:
         report = BatchActionReport(
@@ -174,3 +197,33 @@ class AppController:
             f"Batch reject: ok={report.succeeded_count}, failed={report.failed_count}"
         )
         return report
+
+    def run_with_options(self, payload: dict[str, str | bool]) -> DashboardSnapshot:
+        source_dir = Path(str(payload.get("source_dir") or self.config.source_dir)).expanduser()
+        data_dir = Path(str(payload.get("data_dir") or self.config.data_dir)).expanduser()
+        enable_ai_review = not bool(payload.get("skip_ai", not self.config.enable_ai_review))
+        ollama_model = str(payload.get("ollama_model") or self.config.ollama_model)
+        ai_budget = self._coerce_optional_int(payload.get("ai_budget"), self.config.ai_budget_per_cycle)
+        ai_max_examples = self._coerce_optional_int(
+            payload.get("ai_max_examples"),
+            self.config.ai_max_examples,
+        )
+        self.config = AppConfig(
+            source_dir=source_dir,
+            data_dir=data_dir,
+            ollama_endpoint=self.config.ollama_endpoint,
+            ollama_model=ollama_model,
+            ollama_timeout_seconds=self.config.ollama_timeout_seconds,
+            enable_ai_review=enable_ai_review,
+            ai_budget_per_cycle=ai_budget,
+            ai_max_examples=ai_max_examples,
+            watch_poll_interval_seconds=self.config.watch_poll_interval_seconds,
+        )
+        self.app = SynapseaApp.from_config(self.config)
+        return self.run_now()
+
+    def _coerce_optional_int(self, raw_value: object, fallback: int) -> int:
+        text = str(raw_value).strip() if raw_value is not None else ""
+        if not text:
+            return fallback
+        return int(text)

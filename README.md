@@ -34,6 +34,7 @@ Terminalowy interfejs TUI:
 ```bash
 uv run python -m synapsea tui
 uv run python -m synapsea tui --source ~/Downloads --data-dir ./data --skip-ai
+uv run python -m synapsea tui --ollama-model llama3.1:8b --ai-budget 5 --ai-max-examples 2
 ```
 
 Przeglad propozycji review:
@@ -64,6 +65,9 @@ uv run python -m synapsea reject rev_002 --data-dir ./data
 - Domyślnie interpretacja AI korzysta z lokalnego endpointu `http://localhost:11434/api/generate` i modelu `gemma3:4b-it-qat`.
 - Komendy `run` i `watch` wspierają `--ollama-model`, aby wskazać model dla bieżącego uruchomienia.
 - Komenda `tui` uruchamia terminalowy frontend Textual i przyjmuje ten sam bazowy zestaw opcji runtime co `run`.
+- TUI startuje na dashboardzie, pozwala uruchomić `run now` lub `run with options` i przejść do ekranu review.
+- Ekran review wspiera multi-select, batch `apply/reject`, filtr tekstowy, sortowanie po confidence i liczbie plików oraz modal pełnych szczegółów.
+- Batch `apply` w TUI pokazuje ostrzeżenie o realnych operacjach na plikach i raport zbiorczy po zakończeniu.
 - Domyślny timeout żądania do Ollama wynosi `60` sekund.
 - Domyślny budżet AI to `20` wywołań na cykl (`--ai-budget`).
 - Domyślnie do AI trafiają maksymalnie `3` przykładowe pliki z klastra (`--ai-max-examples`).

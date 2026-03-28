@@ -6,6 +6,7 @@ from synapsea.config import AppConfig
 from synapsea.tui.controllers.app_controller import AppController, BatchActionReport
 from synapsea.tui.modals.confirm_batch_action import ConfirmBatchActionModal
 from synapsea.tui.modals.result_modal import ResultModal
+from synapsea.tui.modals.run_options import RunOptionsModal
 from synapsea.tui.screens.dashboard import DashboardScreen
 from synapsea.tui.screens.review import ReviewScreen
 
@@ -45,6 +46,13 @@ class SynapseaTuiApp(App[None]):
         border: round $accent;
     }
 
+    #run-options-modal {
+        width: 60;
+        padding: 1 2;
+        background: $panel;
+        border: round $accent;
+    }
+
     #confirm-warning, #result-body {
         margin: 1 0;
     }
@@ -54,6 +62,7 @@ class SynapseaTuiApp(App[None]):
         ("d", "show_dashboard", "Dashboard"),
         ("w", "show_review", "Review"),
         ("r", "run_now", "Run now"),
+        ("R", "show_run_options", "Run options"),
         ("q", "quit", "Wyjscie"),
     ]
 
@@ -88,12 +97,22 @@ class SynapseaTuiApp(App[None]):
         if self.screen is not self.review_screen:
             self.push_screen(self.review_screen)
 
+    def action_show_run_options(self) -> None:
+        self.push_screen(
+            RunOptionsModal(self.controller.config),
+            callback=self._handle_run_options,
+        )
+
     def action_run_now(self) -> None:
         snapshot = self.controller.run_now()
         if self.dashboard_screen is not None:
             self.dashboard_screen.update_snapshot(snapshot)
         if self.review_screen is not None:
-            updated_items = self.controller.get_review_items(show_all_statuses=self.review_screen.show_all_statuses)
+            updated_items = self.controller.get_review_items(
+                show_all_statuses=self.review_screen.show_all_statuses,
+                text_filter=self.review_screen.text_filter,
+                sort_by=self.review_screen.sort_by,
+            )
             if self.review_screen.is_mounted:
                 self.review_screen.refresh_items(
                     updated_items,
@@ -105,7 +124,11 @@ class SynapseaTuiApp(App[None]):
     def apply_review_filter(self, *, show_all_statuses: bool) -> None:
         if self.review_screen is None:
             return
-        filtered_items = self.controller.get_review_items(show_all_statuses=show_all_statuses)
+        filtered_items = self.controller.get_review_items(
+            show_all_statuses=show_all_statuses,
+            text_filter=self.review_screen.text_filter,
+            sort_by=self.review_screen.sort_by,
+        )
         if self.review_screen.is_mounted:
             self.review_screen.refresh_items(
                 filtered_items,
@@ -173,4 +196,13 @@ class SynapseaTuiApp(App[None]):
             self.dashboard_screen.update_snapshot(self.controller.get_dashboard_snapshot())
         if self.review_screen is not None:
             self.review_screen.selected_ids.clear()
+            self.apply_review_filter(show_all_statuses=self.review_screen.show_all_statuses)
+
+    def _handle_run_options(self, payload: dict[str, str | bool] | None) -> None:
+        if payload is None:
+            return
+        snapshot = self.controller.run_with_options(payload)
+        if self.dashboard_screen is not None:
+            self.dashboard_screen.update_snapshot(snapshot)
+        if self.review_screen is not None:
             self.apply_review_filter(show_all_statuses=self.review_screen.show_all_statuses)

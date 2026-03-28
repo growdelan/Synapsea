@@ -63,6 +63,7 @@
 - Stan zaznaczenia batch jest rozdzielony od focusa, a zmiana filtra usuwa zaznaczenia ukrytych pozycji.
 - Batch `apply` i `reject` w TUI działają sekwencyjnie, pokazują modal potwierdzenia i raport zbiorczy.
 - Błąd pojedynczego elementu w batch `apply/reject` nie zatrzymuje całej operacji, a dashboard i review odświeżają się po akcji.
+- TUI wspiera `run with options`, podstawowy filtr tekstowy, sortowanie review po confidence i liczbie plików oraz pełniejszy podgląd szczegółów rekordu.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -105,12 +106,15 @@
 - Zrealizowano `Milestone 22: Dashboard i run now`.
 - Zrealizowano `Milestone 23: Review screen, focus i multi-select`.
 - Zrealizowano `Milestone 24: Batch apply/reject i odporność operacyjna`.
+- Zrealizowano `Milestone 25: Ergonomia etapu 2 TUI`.
 
 ## Co jest w trakcie
-- Następnym milestone’em do realizacji jest `Milestone 25: Ergonomia etapu 2 TUI`.
+- Wszystkie milestone’y z aktualnej roadmapy (`0.5-25`) są oznaczone jako `done`.
 
 ## Co jest następne
-- Realizacja `Milestone 25: Ergonomia etapu 2 TUI`.
+- Wyznaczenie kolejnego zakresu po domknięciu PRD 005.
+- Ewentualne rozwinięcie TUI o `PreferencesScreen`, `HistoryScreen` i status watchera jako osobny przyrost.
+- Dalsze dopracowanie ergonomii skrótów i prezentacji postępu dla długich operacji.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -118,6 +122,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: zrealizowano `Milestone 25`, dodając `run with options`, filtr tekstowy, sortowanie review i modal pełnych szczegółów.
 - 2026-03-28: zrealizowano `Milestone 24`, dodając batch `apply/reject` w TUI z modalami potwierdzeń, raportami i odpornością na błędy częściowe.
 - 2026-03-28: zrealizowano `Milestone 23`, dodając ekran review TUI z multi-select, panelem szczegółów i filtrem statusów.
 - 2026-03-28: zrealizowano `Milestone 22`, dodając dashboard TUI z akcją `run now`, raportem wyniku i automatycznym odświeżaniem.
