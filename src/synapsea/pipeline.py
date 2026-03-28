@@ -29,7 +29,7 @@ from synapsea.review_queue import ReviewQueueRepository
 from synapsea.scanner import FileScanner
 from synapsea.storage import DecisionLogRepository
 from synapsea.taxonomy import TaxonomyRepository
-from synapsea.user_preferences import UserPreferencesRepository
+from synapsea.user_preferences import PreferenceScoreBreakdown, UserPreferencesRepository
 
 
 FileIterator = Callable[[], Iterable[Path]]
@@ -191,13 +191,21 @@ class SynapseaApp:
             if cluster.heuristic_score < 0.7:
                 continue
             proposal = self._get_or_create_ai_proposal(cluster)
-            if not proposal.should_create_category or proposal.confidence < 0.7:
+            if not proposal.should_create_category:
+                continue
+            breakdown = self._score_review_from_preferences(cluster, proposal)
+            if breakdown.final_confidence < 0.7:
                 continue
             review_item = ReviewItem.from_cluster(
                 cluster=cluster,
                 proposal=proposal,
                 item_id=f"rev_{index:03d}",
             )
+            review_item.base_confidence = breakdown.base_confidence
+            review_item.preference_delta = breakdown.preference_delta
+            review_item.final_confidence = breakdown.final_confidence
+            review_item.preference_reasons = list(breakdown.reasons)
+            review_item.confidence = breakdown.final_confidence
             self.review_queue.add_item(review_item)
         if self.deferred_clusters is not None:
             self.deferred_clusters.save(postponed)
@@ -215,6 +223,30 @@ class SynapseaApp:
         if self.ai_proposal_cache is not None:
             self.ai_proposal_cache.set(fingerprint, proposal)
         return proposal
+
+    def _score_review_from_preferences(
+        self, cluster: CandidateCluster, proposal: CategoryProposal
+    ) -> PreferenceScoreBreakdown:
+        target_path = f"{cluster.parent_category}/{proposal.proposed_category}"
+        if self.user_preferences is None:
+            return self._default_breakdown(proposal.confidence)
+        return self.user_preferences.score_review_item(
+            parent_category=cluster.parent_category,
+            proposed_category=proposal.proposed_category,
+            target_path=target_path,
+            base_confidence=proposal.confidence,
+            tokens=list(cluster.top_tokens),
+            heuristics=[cluster.cluster_type] if cluster.cluster_type else [],
+            patterns=list(cluster.pattern_signals.keys()),
+        )
+
+    def _default_breakdown(self, base_confidence: float) -> PreferenceScoreBreakdown:
+        return PreferenceScoreBreakdown(
+            base_confidence=base_confidence,
+            preference_delta=0.0,
+            final_confidence=base_confidence,
+            reasons=[],
+        )
 
     def _iter_source_files(self) -> Iterable[Path]:
         yield from self.scanner.scan(self.source_dir)

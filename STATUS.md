@@ -47,6 +47,9 @@
 - Magazyn preferencji wspiera statystyki dla tokenów, heurystyk, wzorców i par propozycji.
 - `apply` aktualizuje dodatnie sygnały preferencji dla par propozycji i dostępnych cech plików.
 - `reject` aktualizuje negatywny sygnał pary propozycji w sposób konserwatywny.
+- Generowanie review item wylicza `final_confidence` na podstawie `base_confidence` i korekty preferencji.
+- Review item zawiera explainability (`base_confidence`, `preference_delta`, `final_confidence`, `preference_reasons`).
+- Ranking kolejki review wykorzystuje finalny confidence, zachowując priorytet statusu `pending`.
 
 ## Co jest skończone
 - Zdefiniowano wizję produktu, zakres MVP i ograniczenia poza MVP.
@@ -82,12 +85,12 @@
 - Zrealizowano `Milestone 15: Redukcja ryzyka PRD 004 i kontrakty kompatybilności`.
 - Zrealizowano `Milestone 16: Repozytorium preferencji użytkownika`.
 - Zrealizowano `Milestone 17: Uczenie preferencji na apply/reject`.
+- Zrealizowano `Milestone 18: Scoring preferencji i explainability review`.
 
 ## Co jest w trakcie
-- Trwa realizacja nowej puli milestone’ów `18-20` dla PRD 004 (uczenie preferencji użytkownika).
+- Trwa realizacja nowej puli milestone’ów `19-20` dla PRD 004 (uczenie preferencji użytkownika).
 
 ## Co jest następne
-- Milestone 18: korekta rankingu review o final confidence i explainability.
 - Milestone 19: nowa komenda `preferences` i rozszerzony widok breakdown w `review --verbose`.
 - Milestone 20: stabilizacja end-to-end PRD 004 i finalne domknięcie jakości.
 
@@ -101,6 +104,7 @@
 - 2026-03-28: zrealizowano `Milestone 15`, dodając kontrakty kompatybilności ReviewItem/review queue oraz testy regresyjne.
 - 2026-03-28: zrealizowano `Milestone 16`, dodając trwałe repozytorium preferencji i testy read/write dla `user_preferences.json`.
 - 2026-03-28: zrealizowano `Milestone 17`, integrując uczenie preferencji z decyzjami `apply/reject`.
+- 2026-03-28: zrealizowano `Milestone 18`, dodając scoring preferencji i pola explainability dla review.
 - 2026-03-26: zaktualizowano `review`, aby domyślnie pokazywał tylko `pending`; dodano opcję `--all-statuses`.
 - 2026-03-26: skaner został rozszerzony o ignorowanie ukrytych plików i katalogów (np. `.DS_Store`) oraz test regresyjny.
 - 2026-03-26: zrealizowano `Milestone 14`, dodając argument `--ollama-model` dla komend `run` i `watch` oraz testy regresyjne konfiguracji modelu.

@@ -69,6 +69,14 @@ class UserPreferencesSnapshot:
     proposal_preferences: dict[str, PreferenceStats]
 
 
+@dataclass(slots=True)
+class PreferenceScoreBreakdown:
+    base_confidence: float
+    preference_delta: float
+    final_confidence: float
+    reasons: list[str]
+
+
 class UserPreferencesRepository:
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -106,6 +114,48 @@ class UserPreferencesRepository:
         proposal[pair_key] = stats.to_dict()
         self._write(payload)
 
+    def score_review_item(
+        self,
+        *,
+        parent_category: str,
+        proposed_category: str,
+        target_path: str,
+        base_confidence: float,
+        tokens: list[str],
+        heuristics: list[str],
+        patterns: list[str],
+    ) -> PreferenceScoreBreakdown:
+        snapshot = self.load_snapshot()
+        pair_key = f"{parent_category}::{proposed_category}"
+        pair_score = snapshot.proposal_preferences.get(pair_key, PreferenceStats()).score
+        token_score = self._mean_score(snapshot.token_preferences, tokens, target_path)
+        heuristic_score = self._mean_score(snapshot.heuristic_preferences, heuristics, target_path)
+        pattern_score = self._mean_score(snapshot.pattern_preferences, patterns, target_path)
+
+        pair_component = pair_score * 0.15
+        token_component = token_score * 0.08
+        heuristic_component = heuristic_score * 0.06
+        pattern_component = pattern_score * 0.05
+        delta = pair_component + token_component + heuristic_component + pattern_component
+        final = clamp(base_confidence + delta, 0.0, 0.99)
+
+        reasons: list[str] = []
+        if pair_component:
+            reasons.append(f"pair:{pair_component:+.3f}")
+        if token_component:
+            reasons.append(f"token:{token_component:+.3f}")
+        if heuristic_component:
+            reasons.append(f"heuristic:{heuristic_component:+.3f}")
+        if pattern_component:
+            reasons.append(f"pattern:{pattern_component:+.3f}")
+
+        return PreferenceScoreBreakdown(
+            base_confidence=base_confidence,
+            preference_delta=delta,
+            final_confidence=final,
+            reasons=reasons,
+        )
+
     def _record_nested(self, group: str, signal: str, category_key: str, *, accepted: bool) -> None:
         payload = self._read()
         root = payload.setdefault(group, {})
@@ -135,6 +185,23 @@ class UserPreferencesRepository:
         for pair_key, stats_payload in root.items():
             result[str(pair_key)] = PreferenceStats.from_dict(dict(stats_payload))
         return result
+
+    def _mean_score(
+        self,
+        bucket: dict[str, dict[str, PreferenceStats]],
+        signals: list[str],
+        category_key: str,
+    ) -> float:
+        if not signals:
+            return 0.0
+        scores: list[float] = []
+        for signal in signals:
+            score = bucket.get(signal, {}).get(category_key)
+            if score is not None:
+                scores.append(score.score)
+        if not scores:
+            return 0.0
+        return sum(scores) / len(scores)
 
     def _read(self) -> dict[str, Any]:
         return json.loads(self.path.read_text(encoding="utf-8"))

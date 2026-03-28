@@ -389,7 +389,7 @@ Zakres:
 
 ---
 
-## Milestone 18: Scoring preferencji i explainability review (planned)
+## Milestone 18: Scoring preferencji i explainability review (done)
 
 Cel:
 - użyć wyuczonych preferencji do korekty confidence przyszłych propozycji review
