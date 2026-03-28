@@ -329,3 +329,117 @@ Zakres:
 - rozszerzenie parsera CLI dla `run` i `watch` o opcję `--ollama-model`
 - rozszerzenie konfiguracji runtime i przekazania modelu do klienta Ollama
 - aktualizacja dokumentacji uruchomienia oraz testów CLI/pipeline
+
+---
+
+## Milestone 15: Redukcja ryzyka PRD 004 i kontrakty kompatybilności (done)
+
+Cel:
+- zredukować ryzyko wdrożenia personalizacji przez doprecyzowanie kontraktów danych preferencji
+- potwierdzić kompatybilność wsteczną formatów review przy nowych polach explainability
+
+Definition of Done:
+- istnieje opisany i przetestowany kontrakt lokalnego magazynu `user_preferences.json`
+- odczyt starszych wpisów review bez pól preferencji działa bez wyjątków
+- zdefiniowano i przetestowano konserwatywną zasadę wpływu pojedynczego sygnału na score
+- testy kontraktowe i regresyjne dla warstwy modeli/review przechodzą
+
+Zakres:
+- doprecyzowanie kontraktów modeli preferencji i rozszerzeń `ReviewItem`
+- testy kompatybilności wstecz dla `review_queue.json`
+- testy walidujące zachowanie scoringu dla pojedynczego i powtarzalnego sygnału
+
+---
+
+## Milestone 16: Repozytorium preferencji użytkownika (planned)
+
+Cel:
+- dostarczyć trwały, lokalny magazyn preferencji użytkownika zgodny z PRD 004
+- zapewnić prosty i audytowalny mechanizm aktualizacji liczników i score
+
+Definition of Done:
+- istnieje komponent repozytorium preferencji oparty o `data/user_preferences.json`
+- wspierane są statystyki co najmniej dla tokenów, heurystyk, wzorców i par propozycji
+- zapis i odczyt danych jest deterministyczny i odporny na brak pliku początkowego
+- testy jednostkowe repozytorium i modelu preferencji przechodzą
+
+Zakres:
+- implementacja persystencji preferencji użytkownika
+- implementacja modelu statystyk preferencji i wyliczania score
+- testy read/write i aktualizacji liczników accept/reject
+
+---
+
+## Milestone 17: Uczenie preferencji na apply/reject (planned)
+
+Cel:
+- zintegrować uczenie preferencji z decyzjami użytkownika w komendach `apply` i `reject`
+- utrzymać konserwatywny charakter uczenia dla sygnałów odrzucenia
+
+Definition of Done:
+- `apply` aktualizuje pozytywne sygnały preferencji na podstawie pary propozycji oraz dostępnych cech
+- `reject` aktualizuje co najmniej negatywny sygnał dla pary propozycji
+- brakujące pliki kandydatów nie zatrzymują procesu uczenia
+- testy pokrywają scenariusze `apply`, `reject` i częściowo brakujących `candidate_files`
+
+Zakres:
+- integracja repozytorium preferencji z pipeline po decyzjach review
+- ekstrakcja evidence z review item i historii klasyfikacji
+- testy integracyjne aktualizacji preferencji po decyzjach użytkownika
+
+---
+
+## Milestone 18: Scoring preferencji i explainability review (planned)
+
+Cel:
+- użyć wyuczonych preferencji do korekty confidence przyszłych propozycji review
+- zapewnić audytowalny breakdown wpływu preferencji na wynik
+
+Definition of Done:
+- podczas tworzenia review item wyliczany jest `final_confidence` oparty o base confidence i korekty preferencji
+- ranking review używa finalnego confidence przy zachowaniu dotychczasowej logiki statusów
+- review item zawiera kompatybilne wstecz pola explainability (`base`, `delta`, `final`, `reasons`)
+- testy potwierdzają boost dla powtarzalnych akceptacji i karę dla powtarzalnych odrzuceń
+
+Zakres:
+- integracja scorer preferencji z etapem generowania review queue
+- rozszerzenie modelu review item i repozytorium queue o pola explainability
+- testy rankingowe i kontraktowe dla nowych pól
+
+---
+
+## Milestone 19: CLI preferences i wgląd w confidence breakdown (planned)
+
+Cel:
+- udostępnić użytkownikowi czytelną komendę inspekcji wyuczonych preferencji
+- rozszerzyć widok `review --verbose` o strukturę confidence breakdown
+
+Definition of Done:
+- dostępna jest komenda `preferences` z opcjami `--limit` i `--verbose`
+- output pokazuje top pozytywne/negatywne pary propozycji oraz mapowania token/heurystyka
+- `review --verbose` pokazuje base/delta/final confidence i powody korekty, gdy dane są dostępne
+- testy CLI dla `preferences` i rozszerzonego verbose review przechodzą
+
+Zakres:
+- rozszerzenie parsera CLI i warstwy prezentacji
+- formatowanie podsumowania preferencji z repozytorium
+- testy formattera i parsera nowych opcji
+
+---
+
+## Milestone 20: Stabilizacja end-to-end PRD 004 (planned)
+
+Cel:
+- domknąć jakość i spójność funkcji uczenia preferencji w pełnym przepływie produktu
+- potwierdzić brak regresji dla istniejącego workflow i danych
+
+Definition of Done:
+- działa pełny przepływ: decyzja review -> aktualizacja preferencji -> korekta kolejnych propozycji
+- pełny zestaw testów regresyjnych przechodzi
+- dokumentacja operacyjna i status projektu są zaktualizowane do finalnego stanu PRD 004
+- brak otwartych problemów krytycznych po self-review i ewentualnych poprawkach
+
+Zakres:
+- testy integracyjne end-to-end dla PRD 004
+- końcowa walidacja kompatybilności i wydajnościowej lekkości rozwiązania
+- finalizacja dokumentacji i domknięcie operacyjne zmiany

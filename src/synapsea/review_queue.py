@@ -30,6 +30,16 @@ class ReviewQueueRepository:
                     candidate_files=list(item["candidate_files"]),
                     reason=item["reason"],
                     cluster_id=item["cluster_id"],
+                    base_confidence=(
+                        float(item["base_confidence"]) if "base_confidence" in item else None
+                    ),
+                    preference_delta=(
+                        float(item["preference_delta"]) if "preference_delta" in item else None
+                    ),
+                    final_confidence=(
+                        float(item["final_confidence"]) if "final_confidence" in item else None
+                    ),
+                    preference_reasons=list(item.get("preference_reasons", [])),
                 )
             )
         return sorted(items, key=_review_rank_key)
@@ -71,6 +81,16 @@ class ReviewQueueRepository:
                     candidate_files=list(item["candidate_files"]),
                     reason=item["reason"],
                     cluster_id=item["cluster_id"],
+                    base_confidence=(
+                        float(item["base_confidence"]) if "base_confidence" in item else None
+                    ),
+                    preference_delta=(
+                        float(item["preference_delta"]) if "preference_delta" in item else None
+                    ),
+                    final_confidence=(
+                        float(item["final_confidence"]) if "final_confidence" in item else None
+                    ),
+                    preference_reasons=list(item.get("preference_reasons", [])),
                 )
         raise KeyError(f"Nie znaleziono review item: {item_id}")
 
@@ -106,6 +126,10 @@ def _merge_review_items(existing: dict[str, object], incoming: dict[str, object]
         merged["confidence"] = incoming["confidence"]
         merged["reason"] = incoming["reason"]
         merged["cluster_id"] = incoming["cluster_id"]
+        _replace_optional_field(merged, incoming, "base_confidence")
+        _replace_optional_field(merged, incoming, "preference_delta")
+        _replace_optional_field(merged, incoming, "final_confidence")
+        _replace_optional_field(merged, incoming, "preference_reasons")
     merged["status"] = existing.get("status", incoming.get("status", "pending"))
     merged["candidate_files"] = sorted(
         {
@@ -119,5 +143,11 @@ def _merge_review_items(existing: dict[str, object], incoming: dict[str, object]
 
 def _review_rank_key(item: ReviewItem) -> tuple[int, float, int, str]:
     pending_rank = 0 if item.status == "pending" else 1
+    score = item.final_confidence if item.final_confidence is not None else item.confidence
     # Wyzej: pending, wyzszy confidence i bogatszy kontekst (wiecej kandydatow).
-    return (pending_rank, -item.confidence, -len(item.candidate_files), item.item_id)
+    return (pending_rank, -score, -len(item.candidate_files), item.item_id)
+
+
+def _replace_optional_field(target: dict[str, object], source: dict[str, object], key: str) -> None:
+    if key in source:
+        target[key] = source[key]

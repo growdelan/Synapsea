@@ -32,6 +32,7 @@ Opis funkcjonalności na wysokim poziomie:
 - W przyroście po MVP (PRD 001) `run` pozostaje trybem jednorazowym, a tryb ciągły jest realizowany osobną komendą `watch`.
 - W kolejnym przyroście (PRD 002) warstwa review jest rozszerzana o czytelniejszy widok CLI oraz deduplikację semantyczną propozycji.
 - W kolejnym przyroście (PRD 003) `apply` może wykonywać przeniesienia plików po akceptacji review, a komendy `run/watch` przyjmują argument wyboru modelu `--ollama-model`.
+- W kolejnym przyroście (PRD 004) system uczy się preferencji użytkownika na podstawie decyzji `apply/reject` i używa ich do korekty rankingu propozycji review.
 
 Bez wchodzenia w szczegóły implementacyjne.
 
@@ -102,6 +103,10 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
   - ranking i porządkowanie pozycji review według jakości sygnału i użyteczności dla użytkownika.
 - `review_normalizer` (dotyczy PRD: 002-review-ux-and-deduplication.md):
   - normalizacja nazw i kluczy deduplikacyjnych dla semantycznie równoważnych propozycji.
+- `user_preferences_repository` (dotyczy PRD: 004-user-preference-learning-pl.md):
+  - trwałe utrzymywanie lokalnych preferencji użytkownika i statystyk akceptacji/odrzuceń w `user_preferences.json`.
+- `preference_scorer` (dotyczy PRD: 004-user-preference-learning-pl.md):
+  - wyliczanie korekty `confidence` na podstawie preferencji oraz budowanie strukturalnego explainability dla review item.
 
 ---
 
@@ -204,6 +209,27 @@ Każda decyzja powinna zawierać:
   Konsekwencje:
   - Wynik `apply` musi raportować liczbę kolizji i pominiętych plików.
 
+- Decyzja:
+  - Preferencje użytkownika są utrzymywane lokalnie w czytelnym pliku `data/user_preferences.json`, bez zewnętrznej bazy danych (dotyczy PRD: 004-user-preference-learning-pl.md).
+  Uzasadnienie:
+  - PRD wymaga local-first, audytowalności i niskiego kosztu utrzymania.
+  Konsekwencje:
+  - System dodaje nowy magazyn JSON i musi utrzymać kompatybilność jego odczytu/zapisu między wersjami.
+
+- Decyzja:
+  - Ranking review używa `final_confidence` wyliczanego jako połączenie bazowego confidence oraz korekty preferencji, a nie wyłącznie confidence warstwy AI (dotyczy PRD: 004-user-preference-learning-pl.md).
+  Uzasadnienie:
+  - Celem przyrostu jest personalizacja propozycji przy zachowaniu istniejącego workflow review.
+  Konsekwencje:
+  - `ReviewItem` zawiera pola explainability i musi pozostać kompatybilny wstecz ze starszymi wpisami bez tych pól.
+
+- Decyzja:
+  - Uczenie z odrzuceń jest konserwatywne: najsilniejszy negatywny sygnał dotyczy pary propozycji (`parent_category`, `proposed_category`), a sygnały cech są słabsze lub pomijane (dotyczy PRD: 004-user-preference-learning-pl.md).
+  Uzasadnienie:
+  - Odrzucenie nie zawsze oznacza błędność wszystkich cech plików, lecz często dotyczy kontekstu lub nazewnictwa.
+  Konsekwencje:
+  - Formuła scoringu preferencji musi ograniczać overfitting i wzmacniać wpływ dopiero po powtarzalnym sygnale.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -240,5 +266,5 @@ Wspólne wymagania jakościowe dla całego projektu.
 
 ## Status specyfikacji
 - Data utworzenia: 2026-03-24
-- Ostatnia aktualizacja: 2026-03-26
-- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md` oraz przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md`
+- Ostatnia aktualizacja: 2026-03-28
+- Aktualny zakres obowiązywania: bazowy zakres produktu i MVP opisany w `prd/000-initial-prd.md`, przyrost wydajnościowy opisany w `prd/001-incremental-performance-watcher.md`, przyrost review opisany w `prd/002-review-ux-and-deduplication.md`, przyrost wykonawczy i konfiguracyjny opisany w `prd/003-apply-file-moves-and-ollama-model-cli.md` oraz przyrost uczenia preferencji opisany w `prd/004-user-preference-learning-pl.md`

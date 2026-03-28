@@ -87,6 +87,10 @@ class ReviewItem:
     candidate_files: list[str]
     reason: str
     cluster_id: str
+    base_confidence: float | None = None
+    preference_delta: float | None = None
+    final_confidence: float | None = None
+    preference_reasons: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -100,6 +104,26 @@ class ReviewItem:
             "candidate_files": self.candidate_files,
             "reason": self.reason,
             "cluster_id": self.cluster_id,
+            **(
+                {"base_confidence": self.base_confidence}
+                if self.base_confidence is not None
+                else {}
+            ),
+            **(
+                {"preference_delta": self.preference_delta}
+                if self.preference_delta is not None
+                else {}
+            ),
+            **(
+                {"final_confidence": self.final_confidence}
+                if self.final_confidence is not None
+                else {}
+            ),
+            **(
+                {"preference_reasons": list(self.preference_reasons)}
+                if self.preference_reasons
+                else {}
+            ),
         }
 
     @classmethod
@@ -120,6 +144,10 @@ class ReviewItem:
             candidate_files=cluster.candidate_files,
             reason=proposal.reason,
             cluster_id=cluster.cluster_id,
+            base_confidence=proposal.confidence,
+            preference_delta=0.0,
+            final_confidence=proposal.confidence,
+            preference_reasons=[],
         )
 
 
