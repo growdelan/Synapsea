@@ -35,6 +35,8 @@
 - `watch` na pierwszym cyklu wykonuje ten sam etap bootstrapowej segregacji, a następnie uruchamia mikro-przebiegi tylko po wykryciu zmian.
 - `run` i start `watch` raportują wynik bootstrapowej segregacji jako `requested/moved/skipped/errors`.
 - Bootstrapowa segregacja obsługuje kolizje nazw polityką `skip` (bez nadpisywania) oraz kontynuuje działanie mimo pojedynczych błędów I/O.
+- Na starcie `run/watch` działa migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do kanonicznych katalogów PL.
+- `apply` normalizuje fizyczny katalog docelowy EN->PL, więc nie tworzy równoległych drzew EN (`documents/...`) obok PL (`Dokumenty/...`).
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
 - Komendy `run` i `watch` przyjmują argument `--ollama-model` do wyboru modelu lokalnego per uruchomienie.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
@@ -115,6 +117,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: domknięto naprawę spójności katalogów EN/PL: `apply` mapuje ścieżki EN->PL, bootstrap migracji przenosi legacy drzewa EN do katalogów PL, a testy regresyjne zostały rozszerzone.
 - 2026-03-28: zrealizowano `Milestone 24`, dodając raport bootstrapowej segregacji w `run` i na starcie `watch` oraz testy kolizji i błędów częściowych.
 - 2026-03-28: zrealizowano `Milestone 23`, dodając bootstrapową segregację plików luzem dla aktywnego `--source` przed pipeline `run/watch` oraz testy milestone’u.
 - 2026-03-28: dodano `prd/006-auto-downloads-bootstrap-segregation.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o zakres PRD 006 i milestone’y 23-24.

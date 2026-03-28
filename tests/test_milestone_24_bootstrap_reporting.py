@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from io import StringIO
 from pathlib import Path
@@ -106,6 +107,72 @@ class Milestone24BootstrapReportingTest(unittest.TestCase):
 
             self.assertEqual(watcher.poll_once(), 0)
             self.assertEqual(captured, [(1, 1, 0, 0)])
+
+    def test_segregator_migrates_legacy_english_tree_to_polish_target(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            source_dir = Path(tmp_dir)
+            legacy = source_dir / "documents" / "building guides"
+            canonical = source_dir / "Dokumenty" / "building guides"
+            legacy.mkdir(parents=True, exist_ok=True)
+            canonical.mkdir(parents=True, exist_ok=True)
+
+            old_file = legacy / "guide.pdf"
+            old_file.write_text("legacy", encoding="utf-8")
+            (canonical / "guide.pdf").write_text("canonical", encoding="utf-8")
+            second_file = legacy / "extra.pdf"
+            second_file.write_text("legacy-2", encoding="utf-8")
+
+            report = BootstrapSegregator(source_dir).segregate_root_files()
+
+            self.assertEqual(report.requested, 2)
+            self.assertEqual(report.moved, 1)
+            self.assertEqual(report.skipped, 1)
+            self.assertEqual(report.errors, 0)
+            self.assertTrue((canonical / "extra.pdf").exists())
+            self.assertEqual((canonical / "guide.pdf").read_text(encoding="utf-8"), "canonical")
+            self.assertTrue((legacy / "guide.pdf").exists())
+
+    def test_apply_with_english_target_path_moves_to_polish_root(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            source_dir = root / "source"
+            data_dir = root / "data"
+            source_dir.mkdir()
+            data_dir.mkdir()
+
+            candidate = source_dir / "a-practical-guide-to-building-agents.pdf"
+            candidate.write_text("stub", encoding="utf-8")
+            (data_dir / "review_queue.json").write_text(
+                json.dumps(
+                    {
+                        "items": [
+                            {
+                                "id": "rev_001",
+                                "type": "create_category",
+                                "status": "pending",
+                                "confidence": 0.9,
+                                "parent_category": "documents",
+                                "proposed_category": "building guides",
+                                "target_path": "documents/building guides",
+                                "candidate_files": [str(candidate)],
+                                "reason": "test",
+                                "cluster_id": "cluster_001",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (data_dir / "taxonomy.json").write_text("{}", encoding="utf-8")
+
+            app = SynapseaApp.from_config(
+                AppConfig.from_args(source=source_dir, data_dir=data_dir, enable_ai_review=False)
+            )
+            _item, report = app.apply_review_item("rev_001")
+
+            self.assertEqual(report.moved, 1)
+            self.assertTrue((source_dir / "Dokumenty" / "building guides" / candidate.name).exists())
+            self.assertFalse((source_dir / "documents" / "building guides" / candidate.name).exists())
 
 
 if __name__ == "__main__":

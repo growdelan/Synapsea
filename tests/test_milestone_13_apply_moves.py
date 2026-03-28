@@ -24,7 +24,7 @@ class Milestone13ApplyMovesTest(unittest.TestCase):
             movable.write_text("move", encoding="utf-8")
             collision.write_text("collision", encoding="utf-8")
 
-            target_dir = source_dir / "images" / "screenshots"
+            target_dir = source_dir / "Zdjęcia" / "screenshots"
             target_dir.mkdir(parents=True, exist_ok=True)
             (target_dir / collision.name).write_text("target", encoding="utf-8")
 

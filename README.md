@@ -72,11 +72,13 @@ uv run python -m synapsea reject rev_010 rev_011 rev_012 --data-dir ./data
 - `run` działa inkrementalnie: przetwarza tylko pliki nowe lub zmodyfikowane od poprzedniego przebiegu i usuwa wpisy historii dla plików usuniętych.
 - `run` przed analizą uruchamia bootstrapową segregację plików luzem z root aktywnego `--source` do katalogów `Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne`.
 - `run` wypisuje raport bootstrapu: `requested`, `moved`, `skipped`, `errors`.
+- Na starcie `run/watch` wykonywana jest także migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do kanonicznych katalogów PL z polityką `skip` przy kolizjach.
 - Pipeline utrzymuje `ai_proposal_cache.json` (cache odpowiedzi AI po fingerprint klastra) i `deferred_clusters.json` (odroczone klastry ponad budżet cyklu).
 - `watch` na pierwszym cyklu uruchamia ten sam etap bootstrapowej segregacji i dopiero potem przechodzi w tryb nasłuchu zmian.
 - `watch` na starcie wypisuje ten sam raport bootstrapu (`requested`, `moved`, `skipped`, `errors`).
 - Podczas bootstrapowej segregacji kolizje nazw są obsługiwane polityką `skip` (bez nadpisywania), a pojedyncze błędy I/O nie zatrzymują całego etapu.
 - Komenda `apply` aktualizuje status propozycji, synchronizuje `taxonomy.json` i wykonuje przeniesienie plików `candidate_files` do docelowej sciezki kategorii.
+- Komenda `apply` normalizuje fizyczną ścieżkę docelową do katalogów PL (`Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne`), nawet jeśli `target_path` w review ma segment EN (`documents/...`, `images/...`).
 - Podczas `apply` kolizje nazw sa obslugiwane polityka `skip` (brak nadpisywania), a wynik komendy raportuje `moved`, `skipped` i `errors`.
 - Komenda `reject` aktualizuje status propozycji bez operacji na plikach.
 - Komendy `apply` i `reject` przyjmuja jedno lub wiele ID w pojedynczym wywolaniu.

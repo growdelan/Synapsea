@@ -7,7 +7,11 @@ import shutil
 from typing import Callable, Iterable
 
 from synapsea.ai_state import AiProposalCacheRepository, DeferredClusterRepository
-from synapsea.bootstrap_segregator import BootstrapSegregationReport, BootstrapSegregator
+from synapsea.bootstrap_segregator import (
+    BootstrapSegregationReport,
+    BootstrapSegregator,
+    normalize_target_path_for_storage,
+)
 from synapsea.candidate_clusters import CandidateClusterRepository
 from synapsea.classifier import FileClassifier
 from synapsea.cluster_engine import ClusterEngine
@@ -370,7 +374,7 @@ class SynapseaApp:
 
     def _move_candidate_files(self, item: ReviewItem) -> ApplyMoveReport:
         report = ApplyMoveReport()
-        destination_dir = self.source_dir / item.target_path
+        destination_dir = self.source_dir / normalize_target_path_for_storage(item.target_path)
 
         for candidate in item.candidate_files:
             source_path = Path(candidate)

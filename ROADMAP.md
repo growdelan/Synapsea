@@ -513,9 +513,11 @@ Definition of Done:
 - kolizje nazw w katalogach docelowych są obsługiwane polityką `skip + raport` bez nadpisywania
 - wynik fazy segregacji raportuje co najmniej `requested/moved/skipped/errors`
 - testy pokrywają scenariusze mapowania, fallbacku `Inne`, kolizji i błędów częściowych
+- `apply` normalizuje `target_path` EN (`documents/...`, `images/...`) do kanonicznych katalogów PL w warstwie plików
 - testy regresyjne potwierdzają ciągłość działania klastrów/AI po fazie segregacji
 
 Zakres:
 - ujednolicenie raportu CLI/logów dla etapu segregacji bootstrapowej
 - implementacja i testy polityki kolizji `skip + raport`
+- migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do katalogów PL przy starcie `run/watch`, bez kasowania pustych katalogów EN
 - testy integracyjne kolejności etapów: segregacja -> klasyfikacja/klastry -> AI/review

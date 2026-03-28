@@ -118,6 +118,7 @@ Lista kluczowych komponentów technicznych i ich odpowiedzialności.
 - `bootstrap_downloads_segregator` (dotyczy PRD: 006-auto-downloads-bootstrap-segregation.md):
   - segregacja plików luzem z root aktywnego katalogu źródłowego do katalogów `Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne` przed klastrowaniem i AI.
   - raportowanie wyniku etapu (`requested/moved/skipped/errors`) oraz obsługa kolizji polityką `skip + raport`.
+  - jednorazowa migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do kanonicznych katalogów PL na starcie `run/watch` bez kasowania pustych katalogów EN.
 
 ---
 
@@ -261,6 +262,13 @@ Każda decyzja powinna zawierać:
   - PRD 006 zakłada automatyczne przeniesienia plików już na starcie `run/watch`, bez kroku review/apply.
   Konsekwencje:
   - Bootstrapowa segregacja aktywnego katalogu źródłowego jest trwałym wyjątkiem od zasady human-in-the-loop i nie wymaga dodatkowego mechanizmu zgody przed uruchomieniem.
+
+- Decyzja:
+  - Warstwa plikowa używa kanonicznych katalogów PL, a ścieżki logiczne EN (`target_path`, `parent_category`) są normalizowane EN->PL wyłącznie przy operacjach I/O (dotyczy PRD: 006-auto-downloads-bootstrap-segregation.md).
+  Uzasadnienie:
+  - Należy zachować kompatybilność istniejących danych i preferencji, jednocześnie eliminując mieszanie katalogów EN/PL na dysku użytkownika.
+  Konsekwencje:
+  - `apply` nie tworzy już równoległych drzew EN (`documents/...`), lecz zapisuje do odpowiadających katalogów PL (`Dokumenty/...`).
 
 ---
 
