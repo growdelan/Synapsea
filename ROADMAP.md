@@ -481,3 +481,43 @@ Zakres:
 - implementacja sekwencyjnego executor’a batch dla `apply/reject` w backendzie
 - agregacja metryk wykonawczych `apply` oraz listy błędów per ID
 - testy integracyjne dla sukcesu, częściowej porażki i kompatybilności pojedynczego ID
+
+---
+
+## Milestone 23: Bootstrapowa segregacja katalogu źródłowego przed pipeline (done)
+
+Cel:
+- dodać etap automatycznej segregacji plików luzem z root aktywnego katalogu źródłowego (domyślnie `~/Downloads`) przed obecnym przepływem klastrowania i AI
+- utrzymać spójne zachowanie startowe dla komend `run` i `watch`
+
+Definition of Done:
+- `run` i `watch` uruchamiają fazę segregacji na starcie
+- segregacja obejmuje tylko pliki bezpośrednio w aktywnym katalogu źródłowym (bez rekurencji w podkatalogach)
+- pliki są kierowane do katalogów `Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne`
+- po zakończeniu segregacji uruchamia się istniejący pipeline klastrów i AI bez regresji
+
+Zakres:
+- implementacja komponentu bootstrapowej segregacji i integracja z entrypointami `run/watch`
+- mapowanie typów plików do katalogów standardowych wraz z fallbackiem `Inne`
+- przygotowanie katalogów docelowych i obsługa podstawowych błędów I/O bez zatrzymania całego etapu
+
+---
+
+## Milestone 24: Raportowanie, kolizje i walidacja segregacji bootstrapowej (done)
+
+Cel:
+- domknąć bezpieczeństwo wykonawcze segregacji przez politykę kolizji i czytelny raport operacyjny
+- potwierdzić brak regresji względem istniejących scenariuszy CLI i pipeline
+
+Definition of Done:
+- kolizje nazw w katalogach docelowych są obsługiwane polityką `skip + raport` bez nadpisywania
+- wynik fazy segregacji raportuje co najmniej `requested/moved/skipped/errors`
+- testy pokrywają scenariusze mapowania, fallbacku `Inne`, kolizji i błędów częściowych
+- `apply` normalizuje `target_path` EN (`documents/...`, `images/...`) do kanonicznych katalogów PL w warstwie plików
+- testy regresyjne potwierdzają ciągłość działania klastrów/AI po fazie segregacji
+
+Zakres:
+- ujednolicenie raportu CLI/logów dla etapu segregacji bootstrapowej
+- implementacja i testy polityki kolizji `skip + raport`
+- migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do katalogów PL przy starcie `run/watch`, bez kasowania pustych katalogów EN
+- testy integracyjne kolejności etapów: segregacja -> klasyfikacja/klastry -> AI/review

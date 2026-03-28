@@ -31,7 +31,12 @@
 - Warstwa AI używa skróconego payloadu klastra, cache fingerprintów i budżetu wywołań na cykl.
 - System utrzymuje kolejkę odroczonych klastrów do dalszej interpretacji AI.
 - Dostępna jest komenda `watch` uruchamiająca tryb ciągłego monitoringu zmian.
-- Watcher startuje bez bootstrapowego przetwarzania i uruchamia mikro-przebiegi tylko po wykryciu zmian.
+- `run` na starcie wykonuje bootstrapową segregację plików luzem z root aktywnego katalogu źródłowego do katalogów standardowych (`Dokumenty`, `Zdjęcia`, `Filmy`, `Audio`, `Instalatory`, `Archiwa`, `Inne`).
+- `watch` na pierwszym cyklu wykonuje ten sam etap bootstrapowej segregacji, a następnie uruchamia mikro-przebiegi tylko po wykryciu zmian.
+- `run` i start `watch` raportują wynik bootstrapowej segregacji jako `requested/moved/skipped/errors`.
+- Bootstrapowa segregacja obsługuje kolizje nazw polityką `skip` (bez nadpisywania) oraz kontynuuje działanie mimo pojedynczych błędów I/O.
+- Na starcie `run/watch` działa migracja legacy katalogów EN (`documents`, `images`, `videos`, `archives`, `installers`, `audio`, `other`) do kanonicznych katalogów PL.
+- `apply` normalizuje fizyczny katalog docelowy EN->PL, więc nie tworzy równoległych drzew EN (`documents/...`) obok PL (`Dokumenty/...`).
 - Błąd pojedynczego przebiegu watchera nie zatrzymuje procesu monitoringu.
 - Komendy `run` i `watch` przyjmują argument `--ollama-model` do wyboru modelu lokalnego per uruchomienie.
 - Komenda `review` pokazuje rozszerzony kontekst propozycji oraz wspiera tryb `--verbose`.
@@ -96,14 +101,15 @@
 - Zrealizowano `Milestone 20: Stabilizacja end-to-end PRD 004`.
 - Zrealizowano `Milestone 21: Kontrakt CLI dla batch apply/reject`.
 - Zrealizowano `Milestone 22: Sekwencyjne wykonanie batch i walidacja regresji`.
+- Zrealizowano `Milestone 23: Bootstrapowa segregacja katalogu źródłowego przed pipeline`.
+- Zrealizowano `Milestone 24: Raportowanie, kolizje i walidacja segregacji bootstrapowej`.
 
 ## Co jest w trakcie
-- Wszystkie milestone’y z aktualnej roadmapy (`0.5-22`) są oznaczone jako `done`.
+- Brak milestone’u ze statusem `in_progress`.
 
 ## Co jest następne
-- Wyznaczenie kolejnego zakresu po domknięciu PRD 005.
+- Po domknięciu PRD 006 wyznaczyć kolejny zakres funkcjonalny.
 - Dalsza poprawa jakości i trafności preferencji dla długich, technicznych ścieżek.
-- Rozważenie opcjonalnego modułu ręcznych override’ów preferencji w osobnym przyroście.
 
 ## Blokery i ryzyka
 - Zakres produktu jest szeroki, więc utrzymanie małych milestone'ów będzie krytyczne dla tempa prac.
@@ -111,6 +117,10 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-28: domknięto naprawę spójności katalogów EN/PL: `apply` mapuje ścieżki EN->PL, bootstrap migracji przenosi legacy drzewa EN do katalogów PL, a testy regresyjne zostały rozszerzone.
+- 2026-03-28: zrealizowano `Milestone 24`, dodając raport bootstrapowej segregacji w `run` i na starcie `watch` oraz testy kolizji i błędów częściowych.
+- 2026-03-28: zrealizowano `Milestone 23`, dodając bootstrapową segregację plików luzem dla aktywnego `--source` przed pipeline `run/watch` oraz testy milestone’u.
+- 2026-03-28: dodano `prd/006-auto-downloads-bootstrap-segregation.md` i rozszerzono `spec.md` oraz `ROADMAP.md` o zakres PRD 006 i milestone’y 23-24.
 - 2026-03-28: zrealizowano `Milestone 22`, przenosząc sekwencyjne wykonanie batch `apply/reject` do backendu i domykając testy regresyjne PRD 005.
 - 2026-03-28: zrealizowano `Milestone 21`, dodając kontrakt CLI dla batch `apply/reject` (wiele ID, raport zbiorczy i politykę kodu wyjścia).
 - 2026-03-28: dodano `prd/005-batch-apply-reject-cli.md` oraz rozszerzono `spec.md` i `ROADMAP.md` o zakres PRD 005 i milestone’y 21-22.

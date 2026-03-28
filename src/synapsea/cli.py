@@ -5,6 +5,7 @@ from io import StringIO
 from pathlib import Path
 from typing import TextIO
 
+from synapsea.bootstrap_segregator import BootstrapSegregationReport
 from synapsea.config import AppConfig
 from synapsea.pipeline import SynapseaApp
 from synapsea.watcher import WatchService
@@ -126,6 +127,8 @@ def main(argv: list[str] | None = None) -> int:
     app = SynapseaApp.from_config(config)
 
     if args.command == "run":
+        bootstrap_report = app.bootstrap_segregate_root_files()
+        print(_format_bootstrap_report(bootstrap_report))
         processed = app.run_once()
         print(f"Processed {processed} file(s).")
         return 0
@@ -155,6 +158,7 @@ def main(argv: list[str] | None = None) -> int:
             app=app,
             source_dir=config.source_dir,
             poll_interval_seconds=config.watch_poll_interval_seconds,
+            on_bootstrap_report=lambda report: print(_format_bootstrap_report(report)),
         )
         watcher.run_forever()
         return 0
@@ -183,3 +187,13 @@ def _print_review_items(items, verbose: bool = False, out: TextIO | None = None)
             print(line)
         else:
             output.write(f"{line}\n")
+
+
+def _format_bootstrap_report(report: BootstrapSegregationReport) -> str:
+    return (
+        "Bootstrap segregation "
+        f"requested={report.requested} "
+        f"moved={report.moved} "
+        f"skipped={report.skipped} "
+        f"errors={report.errors}"
+    )

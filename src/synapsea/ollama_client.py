@@ -87,9 +87,19 @@ class OllamaClient:
         payload = {
             "cluster": self._build_cluster_summary(cluster),
             "instructions": (
-                "Oceń czy warto utworzyć kategorię. "
-                "Odpowiedz JSON-em z polami should_create_category, "
-                "proposed_category, reason, confidence. "
+                "Jesteś klasyfikatorem propozycji kategorii plików dla lokalnej aplikacji CLI. "
+                "Oceń spójność klastra i zdecyduj, czy warto utworzyć nową podkategorię. "
+                "Zasady decyzji: "
+                "1) should_create_category=true tylko gdy klaster jest spójny semantycznie: "
+                "tokeny i rozszerzenia wskazują jeden temat oraz nazwa kategorii może być konkretna i krótka. "
+                "2) should_create_category=false gdy temat jest zbyt ogólny (np. misc, files, new), "
+                "sygnały są mieszane lub niejednoznaczne, albo nazwa byłaby sztuczna lub oparta na pojedynczym pliku. "
+                "3) proposed_category: 1-3 słowa, małe litery, bez znaków specjalnych, "
+                "nazwa rzeczowa i stabilna, bez dat i numerów wersji. "
+                "4) confidence: 0.0-1.0, a wartości >=0.75 tylko przy wyraźnej spójności klastra. "
+                "Odpowiedz WYŁĄCZNIE poprawnym JSON zgodnym ze schematem: "
+                "should_create_category, proposed_category, reason, confidence. "
+                "Bez markdown, bez dodatkowych pól, bez komentarzy. "
                 f"Użyj dokładnie tego schematu JSON: {json.dumps(schema, ensure_ascii=False)}"
             ),
         }
