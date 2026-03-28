@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from textual.css.query import NoMatches
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, SelectionList, Static
@@ -59,7 +60,11 @@ class ReviewScreen(Screen[None]):
                 f"{item.proposed_category} | {item.confidence:.2f} | {item.candidate_count}"
             )
             options.append((label, item.item_id, item.item_id in self.selected_ids))
-        selection_list = self.query_one(SelectionList)
+        try:
+            selection_list = self.query_one(SelectionList)
+            detail_widget = self.query_one("#review-detail", Static)
+        except NoMatches:
+            return
         selection_list.clear_options()
         selection_list.add_options(options)
         selection_list.focus()
@@ -67,7 +72,7 @@ class ReviewScreen(Screen[None]):
             selection_list.highlighted = 0
             self._update_detail(0)
         else:
-            self.query_one("#review-detail", Static).update("Brak pozycji review dla biezacego filtra.")
+            detail_widget.update("Brak pozycji review dla biezacego filtra.")
 
     def action_toggle_current(self) -> None:
         selection_list = self.query_one(SelectionList)

@@ -45,3 +45,24 @@ class Milestone22TuiDashboardRunTest(unittest.TestCase):
                     await pilot.press("q")
 
         asyncio.run(runner())
+
+    def test_tui_run_now_after_return_from_review_does_not_crash(self) -> None:
+        async def runner() -> None:
+            with TemporaryDirectory() as tmp_dir:
+                source_dir = Path(tmp_dir) / "source"
+                data_dir = Path(tmp_dir) / "data"
+                source_dir.mkdir()
+                data_dir.mkdir()
+                (source_dir / "invoice.pdf").write_text("demo", encoding="utf-8")
+                config = AppConfig.from_args(source=source_dir, data_dir=data_dir, enable_ai_review=False)
+                app = SynapseaTuiApp.from_config(config)
+
+                async with app.run_test() as pilot:
+                    await pilot.press("w", "d", "r")
+                    await pilot.pause()
+                    self.assertEqual(getattr(app.screen, "id", None), "dashboard")
+                    summary_widget = app.screen.query_one("#dashboard-summary")
+                    self.assertIn("Processed 1 file(s).", str(summary_widget.render()))
+                    await pilot.press("q")
+
+        asyncio.run(runner())

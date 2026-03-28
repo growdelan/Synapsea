@@ -84,7 +84,9 @@ class Milestone23TuiReviewScreenTest(unittest.TestCase):
                 app = SynapseaTuiApp.from_config(config)
 
                 async with app.run_test() as pilot:
-                    await pilot.press("w", "space", "down")
+                    await pilot.press("w")
+                    await pilot.pause()
+                    await pilot.press("space", "down")
                     review_screen = app.screen
                     selection_list = review_screen.query_one(SelectionList)
                     self.assertEqual(set(selection_list.selected), {"rev_001"})
@@ -103,7 +105,9 @@ class Milestone23TuiReviewScreenTest(unittest.TestCase):
                 app = SynapseaTuiApp.from_config(config)
 
                 async with app.run_test() as pilot:
-                    await pilot.press("w", "A")
+                    await pilot.press("w")
+                    await pilot.pause()
+                    await pilot.press("A")
                     selection_list = app.screen.query_one(SelectionList)
                     self.assertEqual(len(selection_list.options), 3)
                     await pilot.press("p")
@@ -121,7 +125,12 @@ class Milestone23TuiReviewScreenTest(unittest.TestCase):
                 app = SynapseaTuiApp.from_config(config)
 
                 async with app.run_test() as pilot:
-                    await pilot.press("w", "A", "x")
+                    await pilot.press("w")
+                    await pilot.pause()
+                    await pilot.press("A")
+                    selection_list = app.screen.query_one(SelectionList)
+                    self.assertEqual(len(selection_list.options), 3)
+                    await pilot.press("x")
                     selection_list = app.screen.query_one(SelectionList)
                     self.assertEqual(set(selection_list.selected), {"rev_001", "rev_002", "rev_003"})
                     await pilot.press("p")
