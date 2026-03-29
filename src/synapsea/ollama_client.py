@@ -87,20 +87,20 @@ class OllamaClient:
         payload = {
             "cluster": self._build_cluster_summary(cluster),
             "instructions": (
-                "Jesteś klasyfikatorem propozycji kategorii plików dla lokalnej aplikacji CLI. "
-                "Oceń spójność klastra i zdecyduj, czy warto utworzyć nową podkategorię. "
-                "Zasady decyzji: "
-                "1) should_create_category=true tylko gdy klaster jest spójny semantycznie: "
-                "tokeny i rozszerzenia wskazują jeden temat oraz nazwa kategorii może być konkretna i krótka. "
-                "2) should_create_category=false gdy temat jest zbyt ogólny (np. misc, files, new), "
-                "sygnały są mieszane lub niejednoznaczne, albo nazwa byłaby sztuczna lub oparta na pojedynczym pliku. "
-                "3) proposed_category: 1-3 słowa, małe litery, bez znaków specjalnych, "
-                "nazwa rzeczowa i stabilna, bez dat i numerów wersji. "
-                "4) confidence: 0.0-1.0, a wartości >=0.75 tylko przy wyraźnej spójności klastra. "
-                "Odpowiedz WYŁĄCZNIE poprawnym JSON zgodnym ze schematem: "
-                "should_create_category, proposed_category, reason, confidence. "
-                "Bez markdown, bez dodatkowych pól, bez komentarzy. "
-                f"Użyj dokładnie tego schematu JSON: {json.dumps(schema, ensure_ascii=False)}"
+                "You are a classifier of file category proposals for a local CLI application.\n"
+                "Assess the coherence of the cluster and decide whether it is worth creating a new subcategory.\n"
+                "Decision rules:\n"
+                "1. should_create_category=true only when the cluster is semantically coherent:\n"
+                "tokens and extensions indicate a single topic, and the category name can be specific and concise.\n"
+                "2. should_create_category=false when the topic is too general (e.g., misc, files, new),\n"
+                "signals are mixed or ambiguous, or the name would be artificial or based on a single file.\n"
+                "3. proposed_category: 1-3 words, lowercase, no special characters,\n"
+                "a concrete and stable noun-based name, without dates or version numbers.\n"
+                "4. confidence: 0.0-1.0, with values >=0.75 only when the cluster coherence is clear.\n"
+                "Respond ONLY with valid JSON compliant with the schema:\n"
+                "should_create_category, proposed_category, reason, confidence.\n"
+                "No markdown, no additional fields, no comments.\n"
+                f"Use exactly this JSON schema: {json.dumps(schema, ensure_ascii=False)}"
             ),
         }
         response_payload = self.transport.send(payload, format_schema=schema)

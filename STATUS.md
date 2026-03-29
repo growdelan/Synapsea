@@ -18,6 +18,7 @@
 - Pipeline potrafi przekazać kandydatów klastrów do warstwy interpretacji AI i zapisać propozycje do `review_queue.json`.
 - Review queue utrzymuje statusy propozycji i deduplikuje wpisy po `cluster_id`.
 - Warstwa Ollama korzysta ze structured outputs z walidacją przez `pydantic` zamiast opierać się na swobodnym parsowaniu tekstu.
+- Prompt klasyfikatora kategorii w `OllamaClient` jest utrzymywany w języku angielskim przy zachowaniu wymuszenia odpowiedzi JSON zgodnej ze schematem.
 - Dostępne są komendy CLI `review`, `apply` i `reject`.
 - Akceptacja propozycji aktualizuje `taxonomy.json`, a odrzucenie zmienia status bez skutków ubocznych dla danych źródłowych.
 - `apply` wykonuje faktyczne przeniesienia plików `candidate_files` do docelowej ścieżki kategorii.
@@ -117,6 +118,7 @@
 - Skuteczność klasyfikacji i akceptowalność propozycji review trzeba będzie potwierdzić na ręcznie zweryfikowanej próbce plików.
 
 ## Ostatnie aktualizacje
+- 2026-03-29: przełączono prompt klasyfikatora kategorii w `OllamaClient` na wersję angielską, zachowując jawne wstrzyknięcie schematu JSON do instrukcji modelu.
 - 2026-03-28: domknięto naprawę spójności katalogów EN/PL: `apply` mapuje ścieżki EN->PL, bootstrap migracji przenosi legacy drzewa EN do katalogów PL, a testy regresyjne zostały rozszerzone.
 - 2026-03-28: zrealizowano `Milestone 24`, dodając raport bootstrapowej segregacji w `run` i na starcie `watch` oraz testy kolizji i błędów częściowych.
 - 2026-03-28: zrealizowano `Milestone 23`, dodając bootstrapową segregację plików luzem dla aktywnego `--source` przed pipeline `run/watch` oraz testy milestone’u.
